@@ -7,3 +7,6 @@ check.log
 __pycache__/
 *.pyc
 .DS_Store
+*.plist
+enable.sh
+disable.sh

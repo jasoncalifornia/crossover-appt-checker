@@ -21,7 +21,7 @@ from playwright.async_api import async_playwright, TimeoutError as PlaywrightTim
 CROSSOVER_USERNAME = os.environ["CROSSOVER_USERNAME"]
 CROSSOVER_PASSWORD = os.environ["CROSSOVER_PASSWORD"]
 NOTIFY_EMAIL       = os.environ["NOTIFY_EMAIL"]
-NOTIFY_PHONE_SMS   = os.environ["NOTIFY_PHONE"] + "@vtext.com"   # Verizon SMS gateway
+NOTIFY_PHONE_SMS   = os.environ["NOTIFY_PHONE"] + "@" + os.environ.get("NOTIFY_PHONE_GATEWAY", "vtext.com")
 FROM_EMAIL         = os.environ["NOTIFY_FROM_EMAIL"]
 
 resend.api_key = os.environ["RESEND_API_KEY"]

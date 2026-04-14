@@ -30,6 +30,6 @@ fi
 
 echo ""
 echo "Setup complete. Next steps:"
-echo "  1. Edit .env with your Crossover/Intuit credentials"
+echo "  1. Edit .env with your Crossover credentials"
 echo "  2. Run a test login:  ./debug.sh"
 echo "  3. Enable scheduling: ./enable.sh"
