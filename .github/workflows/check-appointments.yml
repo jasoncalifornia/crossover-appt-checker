@@ -2,7 +2,11 @@ name: Check Crossover Acupuncture Appointments
 
 on:
   schedule:
-    - cron: '*/15 * * * *'   # every 15 min — script skips runs outside 7am-10pm PT
+    # Every 15 min during 7am-10pm PT (UTC-7/8).
+    # Split into two rules because cron can't span midnight UTC.
+    - cron: '*/15 14-23 * * *'   # UTC 14:00-23:59 = ~7am-4pm PT
+    - cron: '*/15 0-6 * * *'     # UTC 00:00-06:59 = ~4pm-11pm PT
+    # Python script enforces exact hours + weekend 9am start.
   workflow_dispatch:        # allow manual trigger from GitHub UI
 
 jobs:
