@@ -24,8 +24,8 @@ from playwright.async_api import async_playwright, TimeoutError as PlaywrightTim
 # ─── Config ──────────────────────────────────────────────────────────────────
 load_dotenv(Path(__file__).parent / ".env")
 
-NOTIFY_EMAIL   = os.getenv("NOTIFY_EMAIL", "jasondcurry@mac.com")
-NOTIFY_PHONE   = os.getenv("NOTIFY_PHONE", "4083736041")
+NOTIFY_EMAIL   = os.getenv("NOTIFY_EMAIL", "")
+NOTIFY_PHONE   = os.getenv("NOTIFY_PHONE", "")
 
 STATE_FILE     = Path(__file__).parent / ".playwright-state.json"
 SCREENSHOT_DIR = Path(__file__).parent / "screenshots"

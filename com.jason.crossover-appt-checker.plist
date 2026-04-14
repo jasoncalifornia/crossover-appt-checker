@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.jason.crossover-appt-checker</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/jason/claude-code/crossover-appt-checker/run.sh</string>
+    </array>
+
+    <!-- Run every 15 minutes -->
+    <key>StartInterval</key>
+    <integer>900</integer>
+
+    <!-- Only run if network is up -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <!-- Restart on crash -->
+    <key>KeepAlive</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/jason/claude-code/crossover-appt-checker/check.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/jason/claude-code/crossover-appt-checker/check.log</string>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/jason/claude-code/crossover-appt-checker</string>
+</dict>
+</plist>

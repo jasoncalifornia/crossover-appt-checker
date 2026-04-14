@@ -28,5 +28,7 @@ jobs:
           CROSSOVER_USERNAME:  ${{ secrets.CROSSOVER_USERNAME }}
           CROSSOVER_PASSWORD:  ${{ secrets.CROSSOVER_PASSWORD }}
           NOTIFY_EMAIL:        ${{ secrets.NOTIFY_EMAIL }}
+          NOTIFY_PHONE:        ${{ secrets.NOTIFY_PHONE }}
+          NOTIFY_FROM_EMAIL:   ${{ secrets.NOTIFY_FROM_EMAIL }}
           RESEND_API_KEY:      ${{ secrets.RESEND_API_KEY }}
         run: python check_cloud.py
