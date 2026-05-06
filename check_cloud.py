@@ -147,20 +147,33 @@ async def login(page) -> bool:
 
 # ─── Appointment check ───────────────────────────────────────────────────────
 
-# Phrases that indicate a dead-end "no availability" page (case-insensitive).
+# Phrases that indicate a hard dead-end — no acupuncture provider at all.
+# Keep this list narrow: broader phrases like "no appointments available" also
+# appear on the scheduling page's current-week view and must NOT trigger here.
 NO_AVAILABILITY_PHRASES = [
     "no providers available",
     "no providers found",
-    "no availability",
-    "no appointments available",
     "there are no providers",
-    "currently unavailable",
+]
+
+# Markers that confirm we are already on the scheduling page.
+# When these are present, dead-end checks must be skipped.
+SCHEDULING_PAGE_MARKERS = [
+    "choose a provider",
+    "provider, date and time",
+    "all providers",
+    "next available",
 ]
 
 
 def page_has_no_availability(text: str) -> bool:
     lower = text.lower()
     return any(phrase in lower for phrase in NO_AVAILABILITY_PHRASES)
+
+
+def page_is_scheduling(text: str) -> bool:
+    lower = text.lower()
+    return any(marker in lower for marker in SCHEDULING_PAGE_MARKERS)
 
 
 async def find_appointments(page) -> tuple[list, str]:
@@ -302,13 +315,7 @@ async def find_appointments(page) -> tuple[list, str]:
                 # scheduling page with the visit type pre-selected as a label.
                 # Detect this by checking for scheduling-page markers.
                 body_text = await page.inner_text("body")
-                scheduling_markers = [
-                    "choose a provider",
-                    "next available",
-                    "all providers",
-                    "provider, date and time",
-                ]
-                if any(m in body_text.lower() for m in scheduling_markers):
+                if page_is_scheduling(body_text):
                     log.info(f"[{center_label}] No visit-type button but already on scheduling page — proceeding")
                     # Skip the dead-end check and go straight to slot scanning.
                     checked_any = True
@@ -326,9 +333,13 @@ async def find_appointments(page) -> tuple[list, str]:
                     log.info(f"No visit type found at {center_label} — skipping")
                     continue
 
-            # Check again for dead end after visit type selection
+            # After clicking visit type we should be on the scheduling page.
+            # Only bail out if we're NOT on the scheduling page AND the page
+            # clearly says there are no providers (hard dead-end).
+            # Do NOT bail on "no appointments available [this week]" — that
+            # phrase can appear on a valid scheduling page with future slots.
             body_text = await page.inner_text("body")
-            if page_has_no_availability(body_text):
+            if not page_is_scheduling(body_text) and page_has_no_availability(body_text):
                 log.info(f"No providers after visit-type at {center_label} — skipping")
                 continue
 
@@ -379,7 +390,9 @@ _TIME_BTN_RE  = re.compile(r'^\s*\d{1,2}:\d{2}\s*(?:AM|PM)\s*$', re.IGNORECASE)
 _TIME_TEXT_RE = re.compile(r'(?<!\d)\b(\d{1,2}:\d{2}\s*(?:AM|PM))\b(?!\s*[-–])', re.IGNORECASE)
 _DATE_RE      = re.compile(r'(Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*,?\s+\w+\.?\s+\d{1,2}', re.IGNORECASE)
 _NA_RE        = re.compile(r'Next available visit with provider is\s+([^\n.]+)', re.IGNORECASE)
-_NA_BROAD_RE  = re.compile(r'Next available[:\s]+([^\n]+)', re.IGNORECASE)
+# Only match the short button form "Next available: <date>" — NOT the longer
+# "Next available visit…" phrase (handled by _NA_RE above).
+_NA_BROAD_RE  = re.compile(r'Next available:\s*([^\n]+)', re.IGNORECASE)
 
 # Calendar next-page selectors tried in order.
 _NEXT_PAGE_SELECTORS = [
