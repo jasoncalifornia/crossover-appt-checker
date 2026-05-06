@@ -214,9 +214,19 @@ async def find_appointments(page) -> tuple[list, str]:
         await snap(page, "06-centers-error")
         return [], booking_url
 
-    # Choose center — iterate until we reach a date/time picker
-    reached_date_picker = False
+    # Save the centers page URL so we can jump back to it between centers.
+    centers_url = page.url
+
+    # Check EVERY center and collect all available slots — don't stop at the first hit.
+    all_appointments: list = []
+    checked_any = False
+
     for center_label in ["Shoreline", "Mountain View", "San Tomas", "Santa Clara"]:
+        # Always start each iteration from the centers page.
+        if page.url != centers_url:
+            await page.goto(centers_url, timeout=20000, wait_until="networkidle")
+            await page.wait_for_timeout(1500)
+
         try:
             el = page.locator(f'button:has-text("{center_label}")').first
             if not await el.is_visible(timeout=2000):
@@ -233,10 +243,7 @@ async def find_appointments(page) -> tuple[list, str]:
             # Check immediately for dead end (no providers at this center)
             body_text = await page.inner_text("body")
             if page_has_no_availability(body_text):
-                log.info(f"No providers at {center_label} (dead-end page) — going back")
-                await page.go_back()
-                await page.wait_for_load_state("networkidle", timeout=10000)
-                await page.wait_for_timeout(1000)
+                log.info(f"No providers at {center_label} (dead-end page) — skipping")
                 continue
 
             # Select visit type
@@ -257,44 +264,50 @@ async def find_appointments(page) -> tuple[list, str]:
                     continue
 
             if not visit_clicked:
-                log.info(f"No visit type found at {center_label} — going back")
-                await page.go_back()
-                await page.wait_for_load_state("networkidle", timeout=10000)
-                await page.wait_for_timeout(1000)
+                log.info(f"No visit type found at {center_label} — skipping")
                 continue
 
             # Check again for dead end after visit type selection
             body_text = await page.inner_text("body")
             if page_has_no_availability(body_text):
-                log.info(f"No providers after visit-type at {center_label} — going back twice")
-                await page.go_back()
-                await page.wait_for_load_state("networkidle", timeout=10000)
-                await page.go_back()
-                await page.wait_for_load_state("networkidle", timeout=10000)
-                await page.wait_for_timeout(1000)
+                log.info(f"No providers after visit-type at {center_label} — skipping")
                 continue
 
-            reached_date_picker = True
-            booking_url = page.url
-            break
+            # We're on the scheduling/date-picker page for this center.
+            checked_any = True
+            if not booking_url or booking_url == PORTAL_URL:
+                booking_url = page.url
+            await snap(page, f"09-scheduling-{center_label.lower().replace(' ', '-')}")
+            log.info(f"Checking slots for {center_label}: {page.url}")
+
+            slots = await check_for_slots(page, center_label)
+            if slots:
+                log.info(f"  → {len(slots)} slot(s) at {center_label}")
+                all_appointments.extend(slots)
+            else:
+                log.info(f"  → No slots at {center_label}")
 
         except Exception as e:
             log.warning(f"Error navigating center {center_label}: {e}")
             continue
 
-    if not reached_date_picker:
-        log.warning("Could not reach date-picker page via any center")
+    if not checked_any:
+        log.warning("Could not reach scheduling page via any center")
         await snap(page, "09-no-date-picker")
-        return [], booking_url
 
-    log.info(f"Reached scheduling page: {booking_url}")
-    await snap(page, "09-scheduling-page")
-
-    appointments = await check_for_slots(page)
-    return appointments, booking_url
+    return all_appointments, booking_url
 
 
-async def check_for_slots(page) -> list:
+# Map the center button label to a human-readable location name.
+_CENTER_LOCATION = {
+    "Shoreline":     "Mountain View",
+    "Mountain View": "Mountain View",
+    "San Tomas":     "Santa Clara",
+    "Santa Clara":   "Santa Clara",
+}
+
+
+async def check_for_slots(page, center_label: str = "Crossover") -> list:
     """
     Detect available time slots on the scheduling page.
 
@@ -356,16 +369,7 @@ async def check_for_slots(page) -> list:
     )
     dates = date_re.findall(page_text)
 
-    # ── Identify location ──────────────────────────────────────────────────────
-    page_lower = page_text.lower()
-    location = "Crossover"
-    for loc, keywords in [
-        ("Santa Clara", ["san tomas", "santa clara"]),
-        ("Mountain View", ["shoreline", "mountain view"]),
-    ]:
-        if any(k in page_lower for k in keywords):
-            location = loc
-            break
+    location = _CENTER_LOCATION.get(center_label, center_label)
 
     return [{
         "location": location,
