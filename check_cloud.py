@@ -217,11 +217,45 @@ async def find_appointments(page) -> tuple[list, str]:
     # Save the centers page URL so we can jump back to it between centers.
     centers_url = page.url
 
+    # ── Discover centers dynamically ──────────────────────────────────────────
+    # Read every visible button on the centers page; exclude San Francisco and
+    # known non-center UI labels so we catch any location without hardcoding.
+    _NON_CENTER_TEXTS = {
+        "back", "next", "continue", "cancel", "close", "submit",
+        "by visit", "by message", "get care now", "schedule",
+        "acupuncture", "acupuncture follow-up", "acupuncture initial",
+        "california", "all providers", "all centers",
+    }
+    _EXCLUDE_LOCATIONS = ["san francisco"]
+
+    discovered_centers: list[str] = []
+    try:
+        for btn in await page.locator("button").all():
+            try:
+                txt = (await btn.inner_text()).strip()
+                if (
+                    len(txt) > 2
+                    and txt.lower() not in _NON_CENTER_TEXTS
+                    and not any(excl in txt.lower() for excl in _EXCLUDE_LOCATIONS)
+                    and await btn.is_visible()
+                ):
+                    discovered_centers.append(txt)
+            except Exception:
+                continue
+    except Exception as e:
+        log.warning(f"Center discovery error: {e}")
+
+    if not discovered_centers:
+        log.warning("No centers discovered dynamically — using fallback list")
+        discovered_centers = ["Shoreline", "Mountain View", "San Tomas", "Santa Clara"]
+
+    log.info(f"Centers to check ({len(discovered_centers)}): {discovered_centers}")
+
     # Check EVERY center and collect all available slots — don't stop at the first hit.
     all_appointments: list = []
     checked_any = False
 
-    for center_label in ["Shoreline", "Mountain View", "San Tomas", "Santa Clara"]:
+    for center_label in discovered_centers:
         # Always start each iteration from the centers page.
         if page.url != centers_url:
             await page.goto(centers_url, timeout=20000, wait_until="networkidle")
@@ -264,8 +298,33 @@ async def find_appointments(page) -> tuple[list, str]:
                     continue
 
             if not visit_clicked:
-                log.info(f"No visit type found at {center_label} — skipping")
-                continue
+                # Some centers skip the visit-type step and land directly on the
+                # scheduling page with the visit type pre-selected as a label.
+                # Detect this by checking for scheduling-page markers.
+                body_text = await page.inner_text("body")
+                scheduling_markers = [
+                    "choose a provider",
+                    "next available",
+                    "all providers",
+                    "provider, date and time",
+                ]
+                if any(m in body_text.lower() for m in scheduling_markers):
+                    log.info(f"[{center_label}] No visit-type button but already on scheduling page — proceeding")
+                    # Skip the dead-end check and go straight to slot scanning.
+                    checked_any = True
+                    if not booking_url or booking_url == PORTAL_URL:
+                        booking_url = page.url
+                    await snap(page, f"08-direct-scheduling-{center_label.lower().replace(' ', '-')}")
+                    slots = await check_for_slots(page, center_label)
+                    if slots:
+                        log.info(f"  → {len(slots)} slot(s) at {center_label}")
+                        all_appointments.extend(slots)
+                    else:
+                        log.info(f"  → No slots at {center_label}")
+                    continue
+                else:
+                    log.info(f"No visit type found at {center_label} — skipping")
+                    continue
 
             # Check again for dead end after visit type selection
             body_text = await page.inner_text("body")
@@ -298,13 +357,22 @@ async def find_appointments(page) -> tuple[list, str]:
     return all_appointments, booking_url
 
 
-# Map the center button label to a human-readable location name.
-_CENTER_LOCATION = {
-    "Shoreline":     "Mountain View",
-    "Mountain View": "Mountain View",
-    "San Tomas":     "Santa Clara",
-    "Santa Clara":   "Santa Clara",
-}
+def _center_to_location(center_text: str) -> str:
+    """Map a center button label (possibly a full name) to a display location."""
+    lower = center_text.lower()
+    if "san tomas" in lower or "santa clara" in lower:
+        return "Santa Clara"
+    if "shoreline" in lower or "mountain view" in lower:
+        return "Mountain View"
+    if "los altos" in lower:
+        return "Los Altos"
+    if "palo alto" in lower:
+        return "Palo Alto"
+    if "san jose" in lower:
+        return "San Jose"
+    if "fremont" in lower:
+        return "Fremont"
+    return center_text  # fallback: use the raw button text
 
 
 _TIME_BTN_RE  = re.compile(r'^\s*\d{1,2}:\d{2}\s*(?:AM|PM)\s*$', re.IGNORECASE)
@@ -382,7 +450,7 @@ async def check_for_slots(page, center_label: str = "Crossover") -> list:
     """
     await page.wait_for_timeout(3000)
 
-    location = _CENTER_LOCATION.get(center_label, center_label)
+    location = _center_to_location(center_label)
     slug = center_label.lower().replace(" ", "-")
 
     # ── Scan current view ─────────────────────────────────────────────────────
