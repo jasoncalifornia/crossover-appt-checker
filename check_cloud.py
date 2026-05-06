@@ -199,7 +199,7 @@ async def find_appointments(page) -> tuple[list, str]:
         log.info(f"Services page: {page.url}")
         await snap(page, "04-services")
     except Exception as e:
-        log.error(f"Could not click 'Get Care Now': {e}")
+        log.error(f"Could not click 'Get Care Now': {type(e).__name__}")
         await snap(page, "04-services-error")
         return [], booking_url
 
@@ -211,7 +211,7 @@ async def find_appointments(page) -> tuple[list, str]:
         log.info(f"After Acupuncture click: {page.url}")
         await snap(page, "05-acupuncture")
     except Exception as e:
-        log.error(f"Could not select Acupuncture: {e}")
+        log.error(f"Could not select Acupuncture: {type(e).__name__}")
         await snap(page, "05-acupuncture-error")
         return [], booking_url
 
@@ -223,7 +223,7 @@ async def find_appointments(page) -> tuple[list, str]:
         log.info(f"Centers page: {page.url}")
         await snap(page, "06-centers")
     except Exception as e:
-        log.error(f"Could not click 'By Visit': {e}")
+        log.error(f"Could not click 'By Visit': {type(e).__name__}")
         await snap(page, "06-centers-error")
         return [], booking_url
 
@@ -256,7 +256,7 @@ async def find_appointments(page) -> tuple[list, str]:
             except Exception:
                 continue
     except Exception as e:
-        log.warning(f"Center discovery error: {e}")
+        log.warning(f"Center discovery error: {type(e).__name__}")
 
     if not discovered_centers:
         log.warning("No centers discovered dynamically — using fallback list")
@@ -358,7 +358,7 @@ async def find_appointments(page) -> tuple[list, str]:
                 log.info(f"  → No slots at {center_label}")
 
         except Exception as e:
-            log.warning(f"Error navigating center {center_label}: {e}")
+            log.warning(f"Error navigating center {center_label}: {type(e).__name__}")
             continue
 
     if not checked_any:
@@ -570,7 +570,7 @@ async def main():
 
             appointments, booking_url = await find_appointments(page)
         except Exception as e:
-            log.error(f"Unexpected error: {e}", exc_info=True)
+            log.error(f"Unexpected error: {type(e).__name__}")
             await snap(page, "error")
             await browser.close()
             sys.exit(1)
