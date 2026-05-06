@@ -354,13 +354,100 @@ async def check_for_slots(page, center_label: str = "Crossover") -> list:
         if slot_times:
             log.info(f"Fallback text scan found times: {slot_times[:8]}")
         else:
-            # Log "next available" hint if present
-            next_avail = re.search(r'Next available[:\s]+([^\n]+)', page_text, re.IGNORECASE)
-            log.info(
-                f"No slots found. "
-                + (next_avail.group(0).strip() if next_avail else "No next-available info.")
+            # ── "Next available" path ─────────────────────────────────────────
+            # The portal shows "Next available visit with provider is <date>"
+            # when slots exist on a future date not currently in view.
+            # Try to click through to that date; if navigation works, re-scan.
+            # Either way, treat the message as confirmed availability.
+            next_avail_re = re.compile(
+                r'Next available visit with provider is\s+([^\n.]+)',
+                re.IGNORECASE,
             )
-            return []
+            next_avail_broad = re.compile(
+                r'Next available[:\s]+([^\n]+)',
+                re.IGNORECASE,
+            )
+            na_match = next_avail_re.search(page_text) or next_avail_broad.search(page_text)
+
+            if not na_match:
+                log.info("No slots and no next-available indicator found")
+                return []
+
+            avail_date_str = na_match.group(1).strip().rstrip('.')
+            log.info(f"Next available indicator found: '{na_match.group(0).strip()}'")
+
+            # Try clicking a navigation element to jump to that date.
+            nav_selectors = [
+                # Direct "next available" or date link
+                f'button:has-text("{avail_date_str}")',
+                f'a:has-text("{avail_date_str}")',
+                'button:has-text("Next available")',
+                'a:has-text("Next available")',
+                # Generic calendar forward arrows
+                '[aria-label="Next week"]',
+                '[aria-label="next week"]',
+                '[aria-label="Next"]',
+                'button[aria-label="next"]',
+                'button.fc-next-button',
+                'button:has-text("›")',
+                'button:has-text(">")',
+            ]
+            navigated = False
+            for sel in nav_selectors:
+                try:
+                    el = page.locator(sel).first
+                    if await el.is_visible(timeout=1000):
+                        log.info(f"Clicking nav element: {sel}")
+                        await el.click()
+                        await page.wait_for_load_state("networkidle", timeout=10000)
+                        await page.wait_for_timeout(2000)
+                        navigated = True
+                        break
+                except Exception:
+                    continue
+
+            if navigated:
+                await snap(page, f"10-next-avail-nav-{center_label.lower().replace(' ', '-')}")
+                new_text = await page.inner_text("body")
+                log.info(f"After navigation, page text (first 800):\n{new_text[:800]}")
+
+                # Re-run button scan on the new view
+                new_slots = []
+                try:
+                    for btn in await page.locator("button").all():
+                        try:
+                            if not await btn.is_visible():
+                                continue
+                            txt = (await btn.inner_text()).strip()
+                            if time_re.match(txt) and await btn.is_enabled():
+                                new_slots.append(txt)
+                        except Exception:
+                            continue
+                except Exception:
+                    pass
+
+                if not new_slots:
+                    broad_re2 = re.compile(r'(?<!\d)\b(\d{1,2}:\d{2}\s*(?:AM|PM))\b(?!\s*[-–])', re.IGNORECASE)
+                    new_slots = broad_re2.findall(new_text)
+
+                if new_slots:
+                    log.info(f"Slots found after navigation: {new_slots[:8]}")
+                    slot_times = new_slots
+                    page_text = new_text  # use updated text for date extraction below
+                else:
+                    log.info("No time slots visible after navigation — reporting date only")
+            else:
+                log.info("Could not navigate to next-available date — reporting date only")
+
+            if not slot_times:
+                # Report the appointment with the date from the "next available" message.
+                # The user will see the notification and book via the portal link.
+                location = _CENTER_LOCATION.get(center_label, center_label)
+                return [{
+                    "location": location,
+                    "date": avail_date_str,
+                    "time": "See portal",
+                }]
 
     # ── Extract date context from page text ───────────────────────────────────
     date_re = re.compile(
