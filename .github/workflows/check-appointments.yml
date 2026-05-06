@@ -37,3 +37,12 @@ jobs:
           NOTIFY_FROM_EMAIL:    ${{ secrets.NOTIFY_FROM_EMAIL }}
           RESEND_API_KEY:      ${{ secrets.RESEND_API_KEY }}
         run: python check_cloud.py
+
+      - name: Upload screenshots (always, for debugging)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ github.run_id }}
+          path: /tmp/screenshots/
+          if-no-files-found: ignore
+          retention-days: 3
