@@ -307,162 +307,155 @@ _CENTER_LOCATION = {
 }
 
 
-async def check_for_slots(page, center_label: str = "Crossover") -> list:
-    """
-    Detect available time slots on the scheduling page.
+_TIME_BTN_RE  = re.compile(r'^\s*\d{1,2}:\d{2}\s*(?:AM|PM)\s*$', re.IGNORECASE)
+_TIME_TEXT_RE = re.compile(r'(?<!\d)\b(\d{1,2}:\d{2}\s*(?:AM|PM))\b(?!\s*[-–])', re.IGNORECASE)
+_DATE_RE      = re.compile(r'(Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*,?\s+\w+\.?\s+\d{1,2}', re.IGNORECASE)
+_NA_RE        = re.compile(r'Next available visit with provider is\s+([^\n.]+)', re.IGNORECASE)
+_NA_BROAD_RE  = re.compile(r'Next available[:\s]+([^\n]+)', re.IGNORECASE)
 
-    Primary method: find actual <button> elements whose text is a time (e.g. "9:00 AM").
-    These only exist when a slot is truly available and clickable.
-    Fallback: regex scan of page text (catches edge-case rendering).
-    """
-    # Give the SPA time to finish rendering slot data
-    await page.wait_for_timeout(3000)
+# Calendar next-page selectors tried in order.
+_NEXT_PAGE_SELECTORS = [
+    '[aria-label="Next week"]',
+    '[aria-label="next week"]',
+    '[aria-label="Next"]',
+    'button[aria-label="next"]',
+    'button.fc-next-button',
+    'button:has-text("›")',
+    'button:has-text(">")',
+]
 
+# How many calendar pages (weeks) to check beyond the current view.
+_MAX_CAL_PAGES = 12
+
+
+async def _scan_slots(page) -> tuple[list, str]:
+    """
+    Scan the current calendar view for available time slots.
+    Returns (list_of_time_strings, full_page_text).
+    Primary: visible + enabled buttons whose full text is a time.
+    Fallback: regex over all page text (excluding range strings like "8:00 AM – 5:00 PM").
+    """
     page_text = await page.inner_text("body")
-    log.info(f"Scheduling page text (first 1500 chars):\n{page_text[:1500]}")
-
-    # ── Primary: look for visible, enabled time-slot buttons ──────────────────
-    time_re = re.compile(r'^\s*\d{1,2}:\d{2}\s*(?:AM|PM)\s*$', re.IGNORECASE)
-    slot_times = []
+    slots = []
     try:
-        buttons = await page.locator("button").all()
-        for btn in buttons:
+        for btn in await page.locator("button").all():
             try:
                 if not await btn.is_visible():
                     continue
                 txt = (await btn.inner_text()).strip()
-                if time_re.match(txt):
-                    enabled = await btn.is_enabled()
-                    if enabled:
-                        slot_times.append(txt)
+                if _TIME_BTN_RE.match(txt) and await btn.is_enabled():
+                    slots.append(txt)
             except Exception:
                 continue
     except Exception as e:
         log.debug(f"Button scan error: {e}")
 
-    if slot_times:
-        log.info(f"Found {len(slot_times)} available slot button(s): {slot_times[:8]}")
-    else:
-        log.info("No time-slot buttons found via primary scan — trying text fallback")
+    if not slots:
+        slots = _TIME_TEXT_RE.findall(page_text)
 
-        # ── Fallback: regex over all page text ────────────────────────────────
-        # Use a stricter pattern to avoid matching business-hours text:
-        # require time to appear standalone (not "8:00 AM - 5:00 PM" ranges)
-        broad_re = re.compile(r'(?<!\d)\b(\d{1,2}:\d{2}\s*(?:AM|PM))\b(?!\s*[-–])', re.IGNORECASE)
-        slot_times = broad_re.findall(page_text)
+    return slots, page_text
 
-        if slot_times:
-            log.info(f"Fallback text scan found times: {slot_times[:8]}")
-        else:
-            # ── "Next available" path ─────────────────────────────────────────
-            # The portal shows "Next available visit with provider is <date>"
-            # when slots exist on a future date not currently in view.
-            # Try to click through to that date; if navigation works, re-scan.
-            # Either way, treat the message as confirmed availability.
-            next_avail_re = re.compile(
-                r'Next available visit with provider is\s+([^\n.]+)',
-                re.IGNORECASE,
-            )
-            next_avail_broad = re.compile(
-                r'Next available[:\s]+([^\n]+)',
-                re.IGNORECASE,
-            )
-            na_match = next_avail_re.search(page_text) or next_avail_broad.search(page_text)
 
-            if not na_match:
-                log.info("No slots and no next-available indicator found")
-                return []
+async def _try_next_page(page) -> bool:
+    """Click the calendar's next-page control. Returns True if successful."""
+    for sel in _NEXT_PAGE_SELECTORS:
+        try:
+            el = page.locator(sel).first
+            if await el.is_visible(timeout=1000):
+                await el.click()
+                await page.wait_for_load_state("networkidle", timeout=10000)
+                await page.wait_for_timeout(2000)
+                return True
+        except Exception:
+            continue
+    return False
 
-            avail_date_str = na_match.group(1).strip().rstrip('.')
-            log.info(f"Next available indicator found: '{na_match.group(0).strip()}'")
 
-            # Try clicking a navigation element to jump to that date.
-            nav_selectors = [
-                # Direct "next available" or date link
-                f'button:has-text("{avail_date_str}")',
-                f'a:has-text("{avail_date_str}")',
-                'button:has-text("Next available")',
-                'a:has-text("Next available")',
-                # Generic calendar forward arrows
-                '[aria-label="Next week"]',
-                '[aria-label="next week"]',
-                '[aria-label="Next"]',
-                'button[aria-label="next"]',
-                'button.fc-next-button',
-                'button:has-text("›")',
-                'button:has-text(">")',
-            ]
-            navigated = False
-            for sel in nav_selectors:
-                try:
-                    el = page.locator(sel).first
-                    if await el.is_visible(timeout=1000):
-                        log.info(f"Clicking nav element: {sel}")
-                        await el.click()
-                        await page.wait_for_load_state("networkidle", timeout=10000)
-                        await page.wait_for_timeout(2000)
-                        navigated = True
-                        break
-                except Exception:
-                    continue
+async def check_for_slots(page, center_label: str = "Crossover") -> list:
+    """
+    Detect available time slots on the scheduling page.
 
-            if navigated:
-                await snap(page, f"10-next-avail-nav-{center_label.lower().replace(' ', '-')}")
-                new_text = await page.inner_text("body")
-                log.info(f"After navigation, page text (first 800):\n{new_text[:800]}")
-
-                # Re-run button scan on the new view
-                new_slots = []
-                try:
-                    for btn in await page.locator("button").all():
-                        try:
-                            if not await btn.is_visible():
-                                continue
-                            txt = (await btn.inner_text()).strip()
-                            if time_re.match(txt) and await btn.is_enabled():
-                                new_slots.append(txt)
-                        except Exception:
-                            continue
-                except Exception:
-                    pass
-
-                if not new_slots:
-                    broad_re2 = re.compile(r'(?<!\d)\b(\d{1,2}:\d{2}\s*(?:AM|PM))\b(?!\s*[-–])', re.IGNORECASE)
-                    new_slots = broad_re2.findall(new_text)
-
-                if new_slots:
-                    log.info(f"Slots found after navigation: {new_slots[:8]}")
-                    slot_times = new_slots
-                    page_text = new_text  # use updated text for date extraction below
-                else:
-                    log.info("No time slots visible after navigation — reporting date only")
-            else:
-                log.info("Could not navigate to next-available date — reporting date only")
-
-            if not slot_times:
-                # Report the appointment with the date from the "next available" message.
-                # The user will see the notification and book via the portal link.
-                location = _CENTER_LOCATION.get(center_label, center_label)
-                return [{
-                    "location": location,
-                    "date": avail_date_str,
-                    "time": "See portal",
-                }]
-
-    # ── Extract date context from page text ───────────────────────────────────
-    date_re = re.compile(
-        r'(Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*,?\s+\w+\.?\s+\d{1,2}',
-        re.IGNORECASE,
-    )
-    dates = date_re.findall(page_text)
+    Checks the current calendar view, then paginates forward up to _MAX_CAL_PAGES
+    weeks. Also handles the "Next available visit with provider is <date>" banner
+    by trying to jump directly to that date and, if navigation fails, still
+    notifying with the date from the banner.
+    """
+    await page.wait_for_timeout(3000)
 
     location = _CENTER_LOCATION.get(center_label, center_label)
+    slug = center_label.lower().replace(" ", "-")
 
-    return [{
-        "location": location,
-        "date": dates[0] if dates else "See portal",
-        "time": slot_times[0],
-    }]
+    # ── Scan current view ─────────────────────────────────────────────────────
+    slot_times, page_text = await _scan_slots(page)
+    log.info(f"[{center_label}] Scheduling page text (first 1500):\n{page_text[:1500]}")
+
+    if slot_times:
+        log.info(f"[{center_label}] Slots on current view: {slot_times[:8]}")
+        dates = _DATE_RE.findall(page_text)
+        return [{"location": location, "date": dates[0] if dates else "See portal", "time": slot_times[0]}]
+
+    # ── Check for "next available" banner ─────────────────────────────────────
+    na_match = _NA_RE.search(page_text) or _NA_BROAD_RE.search(page_text)
+    if na_match:
+        avail_date_str = na_match.group(1).strip().rstrip(".")
+        log.info(f"[{center_label}] Next-available banner: '{na_match.group(0).strip()}'")
+
+        # Try jumping directly to the advertised date before falling back to
+        # one-page-at-a-time pagination.
+        for sel in [
+            f'button:has-text("{avail_date_str}")',
+            f'a:has-text("{avail_date_str}")',
+            'button:has-text("Next available")',
+            'a:has-text("Next available")',
+        ] + _NEXT_PAGE_SELECTORS:
+            try:
+                el = page.locator(sel).first
+                if await el.is_visible(timeout=1000):
+                    log.info(f"[{center_label}] Clicking '{sel}' to reach next-available date")
+                    await el.click()
+                    await page.wait_for_load_state("networkidle", timeout=10000)
+                    await page.wait_for_timeout(2000)
+                    await snap(page, f"10-na-jump-{slug}")
+                    slot_times, page_text = await _scan_slots(page)
+                    if slot_times:
+                        log.info(f"[{center_label}] Slots after jump: {slot_times[:8]}")
+                        dates = _DATE_RE.findall(page_text)
+                        return [{"location": location, "date": dates[0] if dates else avail_date_str, "time": slot_times[0]}]
+                    break
+            except Exception:
+                continue
+
+        # Navigation didn't yield times — but the banner is itself confirmation
+        # that an appointment exists. Notify with the date from the banner.
+        log.info(f"[{center_label}] Reporting next-available date from banner: {avail_date_str}")
+        return [{"location": location, "date": avail_date_str, "time": "See portal"}]
+
+    # ── Paginate forward through the calendar ─────────────────────────────────
+    log.info(f"[{center_label}] No slots or banner on current view — paginating calendar")
+    for page_num in range(1, _MAX_CAL_PAGES + 1):
+        clicked = await _try_next_page(page)
+        if not clicked:
+            log.info(f"[{center_label}] No calendar next-button found — stopping pagination")
+            break
+
+        await snap(page, f"10-cal-p{page_num}-{slug}")
+        slot_times, page_text = await _scan_slots(page)
+        log.info(f"[{center_label}] Cal page {page_num} text (first 600):\n{page_text[:600]}")
+
+        if slot_times:
+            log.info(f"[{center_label}] Slots on cal page {page_num}: {slot_times[:8]}")
+            dates = _DATE_RE.findall(page_text)
+            return [{"location": location, "date": dates[0] if dates else "See portal", "time": slot_times[0]}]
+
+        # Also honour a next-available banner that appears mid-pagination.
+        na_match = _NA_RE.search(page_text) or _NA_BROAD_RE.search(page_text)
+        if na_match:
+            avail_date_str = na_match.group(1).strip().rstrip(".")
+            log.info(f"[{center_label}] Next-available banner on cal page {page_num}: {avail_date_str}")
+            return [{"location": location, "date": avail_date_str, "time": "See portal"}]
+
+    log.info(f"[{center_label}] No slots found within {_MAX_CAL_PAGES} calendar pages")
+    return []
 
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
