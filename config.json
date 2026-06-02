@@ -16,8 +16,8 @@
   "targets": [
     {
       "service": "Acupuncture",
-      "visit_types": ["Acupuncture Follow-Up", "Acupuncture Initial"],
-      "centers": ["Shoreline", "Mountain View", "Santa Clara", "San Tomas", "San Francisco"],
+      "visit_types": ["Acupuncture Follow-Up"],
+      "centers": ["Shoreline", "Mountain View", "San Tomas", "Santa Clara"],
       "check_until": null
     }
   ]
