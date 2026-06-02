@@ -10,3 +10,9 @@ __pycache__/
 *.plist
 enable.sh
 disable.sh
+# Local debug/exploration tools — output contains "Jason Curry" name
+explore.py
+probe_arrows.py
+explore.log
+explore-findings.json
+.cursor/

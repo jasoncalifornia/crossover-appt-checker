@@ -1,21 +1,24 @@
-name: Check Crossover Acupuncture Appointments
+name: Check Crossover Appointments
 
 on:
   schedule:
-    # Every 15 min during 7am-10pm PT (UTC-7/8).
-    # Split into two rules because cron can't span midnight UTC.
+    # Every 15 min during 7am-10pm PT (UTC-7/8). Script enforces exact hours.
     - cron: '*/15 14-23 * * *'   # UTC 14:00-23:59 = ~7am-4pm PT
     - cron: '*/15 0-6 * * *'     # UTC 00:00-06:59 = ~4pm-11pm PT
-    # Python script enforces exact hours + weekend 9am start.
-  workflow_dispatch:        # allow manual trigger from GitHub UI
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed to commit state/last-findings.txt back
 
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-python@v5
         with:
@@ -29,13 +32,13 @@ jobs:
 
       - name: Check appointments
         env:
-          CROSSOVER_USERNAME:  ${{ secrets.CROSSOVER_USERNAME }}
-          CROSSOVER_PASSWORD:  ${{ secrets.CROSSOVER_PASSWORD }}
-          NOTIFY_EMAIL:        ${{ secrets.NOTIFY_EMAIL }}
+          CROSSOVER_USERNAME:   ${{ secrets.CROSSOVER_USERNAME }}
+          CROSSOVER_PASSWORD:   ${{ secrets.CROSSOVER_PASSWORD }}
+          NOTIFY_EMAIL:         ${{ secrets.NOTIFY_EMAIL }}
           NOTIFY_PHONE:         ${{ secrets.NOTIFY_PHONE }}
           NOTIFY_PHONE_GATEWAY: ${{ secrets.NOTIFY_PHONE_GATEWAY }}
           NOTIFY_FROM_EMAIL:    ${{ secrets.NOTIFY_FROM_EMAIL }}
-          RESEND_API_KEY:      ${{ secrets.RESEND_API_KEY }}
+          RESEND_API_KEY:       ${{ secrets.RESEND_API_KEY }}
         run: python check_cloud.py
 
       - name: Upload screenshots (always, for debugging)
@@ -46,3 +49,16 @@ jobs:
           path: /tmp/screenshots/
           if-no-files-found: ignore
           retention-days: 3
+
+      - name: Commit dedupe state if changed
+        if: success()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [[ -n "$(git status --porcelain state/)" ]]; then
+            git add state/
+            git commit -m "chore: update dedupe state [skip ci]"
+            git push
+          else
+            echo "No state changes to commit."
+          fi
