@@ -181,6 +181,46 @@ async def scrape_date_picker(page, weeks_ahead):
 
 # ─── Top-level check_target ──────────────────────────────────────────────────
 
+async def _nav_to_date_picker(page, service, center, visit_types):
+    """Re-walk Get Care Now → service → By Visit → center → visit type. Returns True on date-picker."""
+    if not await navigate_to_centers(page, service):
+        return False
+    if not await select_center(page, center):
+        return False
+    await page.wait_for_load_state("networkidle", timeout=15000)
+    await page.wait_for_timeout(1200)
+    if not await select_visit_type(page, visit_types):
+        return False
+    return "date-picker" in page.url
+
+
+async def _fetch_times_for_day(page, day, service, center, visit_types):
+    """Re-navigate to the date picker, advance to day.week_offset, click the day card, scrape times."""
+    if not await _nav_to_date_picker(page, service, center, visit_types):
+        return []
+    # Advance forward N weeks
+    for _ in range(day.get("week_offset", 0)):
+        if not await click_aria(page, FORWARD_ARIA, timeout=1500):
+            log.debug("  forward arrow gone before reaching target week")
+            return []
+    # Click the day card by aria-label
+    if not await click_aria(page, day["aria"], timeout=2000):
+        log.debug(f"  could not click day {day['aria']}")
+        return []
+    await page.wait_for_timeout(1200)
+    # Collect time-slot button labels (e.g. "10:15 AM" / "3:45 PM")
+    labels = await page.evaluate("""
+        () => Array.from(document.querySelectorAll('button[aria-label], button'))
+            .filter(b => !!(b.offsetWidth && b.offsetHeight))
+            .map(b => (b.getAttribute('aria-label') || b.innerText || '').trim())
+    """)
+    times = set()
+    for s in labels:
+        for t in TIME_PAT.findall(s):
+            times.add(re.sub(r'\s+', '', t).upper().replace('AM', ' AM').replace('PM', ' PM'))
+    return sorted(times)
+
+
 async def check_target(page, target, weeks_ahead):
     """Returns list of findings: [{service, center, slots, booking_url}]."""
     service = target["service"]
@@ -195,17 +235,8 @@ async def check_target(page, target, weeks_ahead):
 
     for center in centers:
         log.info(f"--- {service} @ {center} ---")
-        if not await navigate_to_centers(page, service):
-            continue
-        if not await select_center(page, center):
-            log.info(f"  Center '{center}' not visible for {service}")
-            continue
-        await page.wait_for_load_state("networkidle", timeout=15000)
-        await page.wait_for_timeout(1500)
-
-        chosen = await select_visit_type(page, visit_types)
-        if not chosen:
-            log.info(f"  No matching visit type for {visit_types}")
+        if not await _nav_to_date_picker(page, service, center, visit_types):
+            log.info(f"  Could not reach date-picker for {center}")
             continue
 
         page_text = await page.inner_text("body")
@@ -216,6 +247,7 @@ async def check_target(page, target, weeks_ahead):
         booking_url = page.url
         dp = await scrape_date_picker(page, weeks_ahead)
         slots = dp["available_days"]
+
         if not slots and dp["next_available_text"]:
             slots = [{
                 "label": "Next available",
@@ -225,6 +257,14 @@ async def check_target(page, target, weeks_ahead):
                 "times": [],
             }]
             log.info(f"  📣 'Next available: {dp['next_available_text']}' treated as found")
+
+        # Phase 2: re-navigate and fetch precise times for each available day
+        for d in slots:
+            if d.get("label") == "Next available":
+                continue  # came from text, no aria to click
+            log.info(f"  → fetching times for {d['label']}")
+            d["times"] = await _fetch_times_for_day(page, d, service, center, visit_types)
+            log.info(f"     times: {d['times'] or '(none captured)'}")
 
         if slots:
             findings.append({
@@ -245,6 +285,7 @@ def signature(findings):
     parts = []
     for f in sorted(findings, key=lambda x: (x["service"], x["center"])):
         for s in sorted(f["slots"], key=lambda x: (x.get("date",""), x.get("provider",""))):
+            times = ",".join(s.get("times") or [])
             parts.append(f"{f['service']}|{f['center']}|{s.get('date','')}"
-                         f"|{s.get('visits',0)}|{s.get('provider','')}")
+                         f"|{s.get('visits',0)}|{s.get('provider','')}|{times}")
     return "\n".join(parts)
