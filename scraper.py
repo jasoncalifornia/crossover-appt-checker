@@ -15,6 +15,19 @@ log = logging.getLogger("crossover.scraper")
 
 PORTAL_URL = "https://care.crossoverhealth.com"
 
+# Some center labels on the portal are aliases for the same physical clinic.
+# When the portal exposes both, we want to surface findings only once.
+CENTER_ALIASES = {
+    "shoreline": "Shoreline/Mountain View",
+    "mountain view": "Shoreline/Mountain View",
+    "san tomas": "San Tomas/Santa Clara",
+    "santa clara": "San Tomas/Santa Clara",
+}
+
+
+def canonical_center(name: str) -> str:
+    return CENTER_ALIASES.get(name.strip().lower(), name)
+
 # ─── Selectors / constants ────────────────────────────────────────────────────
 
 NEXT_AVAIL_PAT = re.compile(r'Next available[:\s]+([^\n]+)', re.IGNORECASE)
@@ -269,7 +282,7 @@ async def check_target(page, target, weeks_ahead):
         if slots:
             findings.append({
                 "service": service,
-                "center": center,
+                "center": canonical_center(center),
                 "slots": slots,
                 "booking_url": booking_url,
             })
@@ -277,7 +290,29 @@ async def check_target(page, target, weeks_ahead):
             log.info(f"  ❌ Confirmed NO appointments at {center} for {service} "
                      f"(weeks scanned: {dp['weeks_scanned']})")
 
-    return findings
+    # Dedupe findings: same (service, canonical center) with same (date, provider, times)
+    # gets collapsed — happens when two portal labels point to the same physical clinic.
+    seen = {}
+    for f in findings:
+        key = (f["service"], f["center"])
+        if key not in seen:
+            seen[key] = {"service": f["service"], "center": f["center"],
+                          "slots": [], "booking_url": f["booking_url"]}
+            seen_slots = set()
+            seen[key]["_slot_keys"] = seen_slots
+        else:
+            seen_slots = seen[key]["_slot_keys"]
+        for s in f["slots"]:
+            slot_key = (s.get("date"), s.get("provider"), tuple(s.get("times") or ()))
+            if slot_key in seen_slots:
+                continue
+            seen_slots.add(slot_key)
+            seen[key]["slots"].append(s)
+    deduped = []
+    for v in seen.values():
+        v.pop("_slot_keys", None)
+        deduped.append(v)
+    return deduped
 
 
 def signature(findings):

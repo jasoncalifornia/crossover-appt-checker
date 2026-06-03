@@ -145,10 +145,13 @@ def fire_notifications(findings, cfg):
     for f in findings:
         for s in f["slots"]:
             line = f"- {f['service']} | {f['center']} | {s.get('label', s.get('date'))}"
-            if s.get("visits"):
-                line += f" ({s['visits']} visit{'s' if s['visits'] != 1 else ''})"
+            slot_count = len(s.get("times") or []) or s.get("visits", 0)
+            if slot_count:
+                line += f" ({slot_count} slot{'s' if slot_count != 1 else ''})"
             if s.get("provider"):
                 line += f" with {s['provider']}"
+            if s.get("times"):
+                line += " — " + ", ".join(s["times"])
             lines.append(line)
     booking_url = findings[0].get("booking_url", scraper.PORTAL_URL)
     long_body = f"{title}\n\n" + "\n".join(lines) + f"\n\nBook now: {booking_url}"

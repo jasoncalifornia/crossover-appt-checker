@@ -108,8 +108,11 @@ def build_messages(findings):
     for f in findings:
         for s in f["slots"]:
             base = f"{f['service']} @ {f['center']} — {s.get('label', s.get('date', '?'))}"
-            if s.get("visits"):
-                base += f" ({s['visits']} visit{'s' if s['visits'] != 1 else ''})"
+            # Prefer the number of actual time slots we captured; the day-card
+            # "N visit" count is approximate.
+            slot_count = len(s.get("times") or []) or s.get("visits", 0)
+            if slot_count:
+                base += f" ({slot_count} slot{'s' if slot_count != 1 else ''})"
             if s.get("provider"):
                 base += f" with {s['provider']}"
             if s.get("times"):
