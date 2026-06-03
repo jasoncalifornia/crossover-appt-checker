@@ -112,6 +112,8 @@ def build_messages(findings):
                 base += f" ({s['visits']} visit{'s' if s['visits'] != 1 else ''})"
             if s.get("provider"):
                 base += f" with {s['provider']}"
+            if s.get("times"):
+                base += " — " + ", ".join(s["times"])
             short_lines.append(base)
             long_lines.append("• " + base)
     booking_url = findings[0].get("booking_url", scraper.PORTAL_URL)
