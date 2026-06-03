@@ -1,2 +1,4 @@
-Acupuncture|Mountain View|Jun 2|2|Rachel Combs, LAc
-Acupuncture|Shoreline|Jun 2|2|Rachel Combs, LAc
+Acupuncture|San Tomas|Jun 12|1|Rachel Combs, LAc
+Acupuncture|San Tomas|Jun 4|1|Rachel Combs, LAc
+Acupuncture|Santa Clara|Jun 12|1|Rachel Combs, LAc
+Acupuncture|Santa Clara|Jun 4|1|Rachel Combs, LAc
