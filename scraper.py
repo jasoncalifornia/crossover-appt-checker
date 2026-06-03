@@ -86,7 +86,10 @@ async def get_day_cards(page):
 
 async def navigate_to_centers(page, service):
     """Portal home → Get Care Now → service → By Visit. Lands on the centers list."""
-    await page.goto(PORTAL_URL + "/", timeout=30000, wait_until="networkidle")
+    # domcontentloaded (not networkidle) — portal keeps long-lived XHR/sockets
+    # open, so networkidle frequently exceeds 30s. We wait for specific
+    # elements right after, so DOMContentLoaded is sufficient.
+    await page.goto(PORTAL_URL + "/", timeout=45000, wait_until="domcontentloaded")
     if not await click_first_visible(page, [
         'button:has-text("Get Care Now")', 'a:has-text("Get Care Now")',
     ]):

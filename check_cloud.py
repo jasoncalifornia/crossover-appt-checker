@@ -138,7 +138,21 @@ def send_notifications(findings):
 
 async def login(page):
     log.info("Navigating to portal...")
-    await page.goto(scraper.PORTAL_URL, timeout=30000, wait_until="networkidle")
+    # Retry portal load up to 3x — the portal keeps long-lived XHR/sockets
+    # open, so networkidle exceeds 30s. domcontentloaded is enough since
+    # we wait for the username field explicitly below.
+    last_err = None
+    for attempt in range(3):
+        try:
+            await page.goto(scraper.PORTAL_URL, timeout=45000, wait_until="domcontentloaded")
+            break
+        except PlaywrightTimeout as e:
+            last_err = e
+            log.warning(f"Portal load timed out (attempt {attempt+1}/3); retrying...")
+    else:
+        log.error(f"Portal load failed after 3 attempts: {last_err}")
+        await snap(page, "00-portal-timeout")
+        return False
     await snap(page, "00-initial")
     login_domains = ("secure.crossoverhealth.com", "auth0.com", "auth.crossoverhealth.com")
     if not any(d in page.url for d in login_domains):
