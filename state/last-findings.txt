@@ -1,4 +1,1 @@
-Acupuncture|San Tomas|Jun 12|1|Rachel Combs, LAc|10:15 AM
-Acupuncture|San Tomas|Jun 4|1|Rachel Combs, LAc|10:15 AM,3:00 PM
-Acupuncture|Santa Clara|Jun 12|1|Rachel Combs, LAc|10:15 AM
-Acupuncture|Santa Clara|Jun 4|1|Rachel Combs, LAc|10:15 AM,3:00 PM
+Acupuncture|San Tomas/Santa Clara|Jun 12|1|Rachel Combs, LAc|10:15 AM
