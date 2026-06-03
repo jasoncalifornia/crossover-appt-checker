@@ -87,13 +87,20 @@ async def get_day_cards(page):
 async def navigate_to_centers(page, service):
     """Portal home → Get Care Now → service → By Visit. Lands on the centers list."""
     # domcontentloaded (not networkidle) — portal keeps long-lived XHR/sockets
-    # open, so networkidle frequently exceeds 30s. We wait for specific
-    # elements right after, so DOMContentLoaded is sufficient.
+    # open, so networkidle frequently exceeds 30s. We must then wait
+    # explicitly for the React app to render the "Get Care Now" button.
     await page.goto(PORTAL_URL + "/", timeout=45000, wait_until="domcontentloaded")
+    try:
+        await page.locator('button:has-text("Get Care Now"), a:has-text("Get Care Now")').first.wait_for(
+            state="visible", timeout=30000,
+        )
+    except Exception:
+        log.warning("Get Care Now button never rendered within 30s")
+        return False
     if not await click_first_visible(page, [
         'button:has-text("Get Care Now")', 'a:has-text("Get Care Now")',
     ]):
-        log.warning("Get Care Now button not visible")
+        log.warning("Get Care Now button visible but not clickable")
         return False
     await page.wait_for_load_state("networkidle", timeout=15000)
     await page.wait_for_timeout(1200)
