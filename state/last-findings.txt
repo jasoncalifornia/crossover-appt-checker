@@ -3,7 +3,6 @@ Acupuncture|Shoreline/Mountain View|Aug 5|1|Rachel Combs, LAc|10:15 AM
 Acupuncture|Shoreline/Mountain View|Jul 1|1|Rachel Combs, LAc|10:15 AM
 Acupuncture|Shoreline/Mountain View|Jul 14|1|Rachel Combs, LAc|9:45 AM
 Acupuncture|Shoreline/Mountain View|Jul 22|1|Rachel Combs, LAc|10:15 AM,9:45 AM
-Acupuncture|Shoreline/Mountain View|Jul 22|1|Rachel Combs, LAc|
 Acupuncture|Shoreline/Mountain View|Jul 29|2|Rachel Combs, LAc|10:15 AM,9:45 AM
 Acupuncture|Shoreline/Mountain View|Jul 7|1|Rachel Combs, LAc|10:15 AM,9:45 AM
 Acupuncture|Shoreline/Mountain View|Jul 8|1|Rachel Combs, LAc|9:45 AM
