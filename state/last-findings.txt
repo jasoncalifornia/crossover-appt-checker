@@ -1,3 +1,2 @@
 Acupuncture|San Tomas/Santa Clara|Jun 12|1|Rachel Combs, LAc|10:45 AM
-Acupuncture|Shoreline/Mountain View|Jul 29|2|Rachel Combs, LAc|10:15 AM,9:45 AM
-Acupuncture|Shoreline/Mountain View|Jul 7|1|Rachel Combs, LAc|10:15 AM,9:45 AM
+Acupuncture|Shoreline/Mountain View|Jul 29|1|Rachel Combs, LAc|10:15 AM
