@@ -141,18 +141,28 @@ def fire_notifications(findings, cfg):
     summary = ", ".join(f"{f['service']} @ {f['center']} ({len(f['slots'])})" for f in findings[:5])
     title = f"Crossover: {total} slot(s) found"
 
+    def slot_date_key(item):
+        _, s = item
+        raw = s.get("date", "")
+        try:
+            return datetime.strptime(raw, "%b %d").replace(year=datetime.now().year)
+        except ValueError:
+            return datetime.max
+
+    all_slots = [(f, s) for f in findings for s in f["slots"]]
+    all_slots.sort(key=slot_date_key)
+
     lines = []
-    for f in findings:
-        for s in f["slots"]:
-            line = f"- {f['service']} | {f['center']} | {s.get('label', s.get('date'))}"
-            slot_count = len(s.get("times") or []) or s.get("visits", 0)
-            if slot_count:
-                line += f" ({slot_count} slot{'s' if slot_count != 1 else ''})"
-            if s.get("provider"):
-                line += f" with {s['provider']}"
-            if s.get("times"):
-                line += " — " + ", ".join(s["times"])
-            lines.append(line)
+    for f, s in all_slots:
+        line = f"- {f['service']} | {f['center']} | {s.get('label', s.get('date'))}"
+        slot_count = len(s.get("times") or []) or s.get("visits", 0)
+        if slot_count:
+            line += f" ({slot_count} slot{'s' if slot_count != 1 else ''})"
+        if s.get("provider"):
+            line += f" with {s['provider']}"
+        if s.get("times"):
+            line += " — " + ", ".join(s["times"])
+        lines.append(line)
     booking_url = findings[0].get("booking_url", scraper.PORTAL_URL)
     long_body = f"{title}\n\n" + "\n".join(lines) + f"\n\nBook now: {booking_url}"
 
