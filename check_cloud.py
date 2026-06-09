@@ -105,20 +105,29 @@ def build_messages(findings):
     total = sum(len(f["slots"]) for f in findings)
     subject = f"Crossover: {total} slot(s) found"
     short_lines, long_lines = [], [subject, ""]
-    for f in findings:
-        for s in f["slots"]:
-            base = f"{f['service']} @ {f['center']} — {s.get('label', s.get('date', '?'))}"
-            # Prefer the number of actual time slots we captured; the day-card
-            # "N visit" count is approximate.
-            slot_count = len(s.get("times") or []) or s.get("visits", 0)
-            if slot_count:
-                base += f" ({slot_count} slot{'s' if slot_count != 1 else ''})"
-            if s.get("provider"):
-                base += f" with {s['provider']}"
-            if s.get("times"):
-                base += " — " + ", ".join(s["times"])
-            short_lines.append(base)
-            long_lines.append("• " + base)
+
+    def slot_date_key(item):
+        _, s = item
+        try:
+            return datetime.strptime(s.get("date", ""), "%b %d").replace(year=datetime.now().year)
+        except ValueError:
+            return datetime.max
+
+    all_slots = sorted([(f, s) for f in findings for s in f["slots"]], key=slot_date_key)
+
+    for f, s in all_slots:
+        base = f"{f['service']} @ {f['center']} — {s.get('label', s.get('date', '?'))}"
+        # Prefer the number of actual time slots we captured; the day-card
+        # "N visit" count is approximate.
+        slot_count = len(s.get("times") or []) or s.get("visits", 0)
+        if slot_count:
+            base += f" ({slot_count} slot{'s' if slot_count != 1 else ''})"
+        if s.get("provider"):
+            base += f" with {s['provider']}"
+        if s.get("times"):
+            base += " — " + ", ".join(s["times"])
+        short_lines.append(base)
+        long_lines.append("• " + base)
     booking_url = findings[0].get("booking_url", scraper.PORTAL_URL)
     long_lines += ["", f"Book now: {booking_url}"]
     return subject, "\n".join(short_lines), "\n".join(long_lines), booking_url
