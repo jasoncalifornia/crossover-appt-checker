@@ -13,6 +13,7 @@ disable.sh
 # Local debug/exploration tools — output contains "Jason Curry" name
 explore.py
 probe_arrows.py
+probe_times.py
 explore.log
 explore-findings.json
 .cursor/
