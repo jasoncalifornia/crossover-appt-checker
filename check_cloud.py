@@ -151,49 +151,40 @@ def send_notifications(findings):
 
 
 async def login(page):
-    log.info("Navigating to portal...")
-    # Retry portal load up to 3x — the portal keeps long-lived XHR/sockets
-    # open, so networkidle exceeds 30s. domcontentloaded is enough since
-    # we wait for the username field explicitly below.
-    last_err = None
+    login_domains = ("secure.crossoverhealth.com", "auth0.com", "auth.crossoverhealth.com")
     for attempt in range(3):
+        log.info(f"Login attempt {attempt + 1}/3...")
         try:
             await page.goto(scraper.PORTAL_URL, timeout=45000, wait_until="domcontentloaded")
-            break
-        except PlaywrightTimeout as e:
-            last_err = e
-            log.warning(f"Portal load timed out (attempt {attempt+1}/3); retrying...")
-    else:
-        log.error(f"Portal load failed after 3 attempts: {last_err}")
-        await snap(page, "00-portal-timeout")
-        return False
-    await snap(page, "00-initial")
-    login_domains = ("secure.crossoverhealth.com", "auth0.com", "auth.crossoverhealth.com")
-    if not any(d in page.url for d in login_domains):
-        log.info(f"Already authenticated at: {page.url}")
-        return True
-    try:
-        await page.locator("#username").wait_for(state="visible", timeout=15000)
-        await page.locator("#username").fill(CROSSOVER_USERNAME)
-        await page.locator("#password").fill(CROSSOVER_PASSWORD)
-        await snap(page, "01-credentials")
-        await page.locator("#password").press("Enter")
-    except PlaywrightTimeout:
-        log.error("Login form not found")
-        await snap(page, "01-login-error")
-        return False
-    try:
-        await page.wait_for_url(
-            lambda u: "care.crossoverhealth.com" in u and "secure." not in u,
-            timeout=30000,
-        )
-    except PlaywrightTimeout:
-        log.error(f"Login redirect timed out at {page.url}")
-        await snap(page, "02-login-timeout")
-        return False
-    await page.wait_for_load_state("networkidle", timeout=15000)
-    log.info(f"Logged in: {page.url}")
-    return True
+        except PlaywrightTimeout:
+            log.warning(f"Portal load timed out (attempt {attempt + 1}/3); retrying...")
+            continue
+        await snap(page, f"0{attempt}-initial")
+        if not any(d in page.url for d in login_domains):
+            log.info(f"Already authenticated at: {page.url}")
+            return True
+        try:
+            await page.locator("#username").wait_for(state="visible", timeout=15000)
+            await page.locator("#username").fill(CROSSOVER_USERNAME)
+            await page.locator("#password").fill(CROSSOVER_PASSWORD)
+            await snap(page, f"0{attempt}-credentials")
+            await page.locator("#password").press("Enter")
+        except PlaywrightTimeout:
+            log.warning(f"Login form not found (attempt {attempt + 1}/3); retrying...")
+            continue
+        try:
+            await page.wait_for_url(
+                lambda u: "care.crossoverhealth.com" in u and "secure." not in u,
+                timeout=30000,
+            )
+            log.info(f"Logged in: {page.url}")
+            return True
+        except PlaywrightTimeout:
+            log.warning(f"Login redirect timed out at {page.url} (attempt {attempt + 1}/3); retrying...")
+            await snap(page, f"0{attempt}-login-timeout")
+    log.error("Login failed after 3 attempts")
+    await snap(page, "login-failed")
+    return False
 
 
 async def main():
