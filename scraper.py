@@ -290,27 +290,33 @@ async def check_target(page, target, weeks_ahead):
             log.info(f"  ❌ Confirmed NO appointments at {center} for {service} "
                      f"(weeks scanned: {dp['weeks_scanned']})")
 
-    # Dedupe findings: same (service, canonical center) with same (date, provider, times)
+    # Dedupe findings: same (service, canonical center) with same (date, provider)
     # gets collapsed — happens when two portal labels point to the same physical clinic.
+    # Times are merged so a failed time-fetch on one pass doesn't produce a duplicate
+    # empty-times entry alongside a successful one.
     seen = {}
     for f in findings:
         key = (f["service"], f["center"])
         if key not in seen:
             seen[key] = {"service": f["service"], "center": f["center"],
-                          "slots": [], "booking_url": f["booking_url"]}
-            seen_slots = set()
-            seen[key]["_slot_keys"] = seen_slots
-        else:
-            seen_slots = seen[key]["_slot_keys"]
+                          "slots": [], "booking_url": f["booking_url"],
+                          "_slot_index": {}}
+        slot_index = seen[key]["_slot_index"]
         for s in f["slots"]:
-            slot_key = (s.get("date"), s.get("provider"), tuple(s.get("times") or ()))
-            if slot_key in seen_slots:
-                continue
-            seen_slots.add(slot_key)
-            seen[key]["slots"].append(s)
+            slot_key = (s.get("date"), s.get("provider"))
+            if slot_key in slot_index:
+                # Merge times — prefer the richer set
+                existing = slot_index[slot_key]
+                new_times = s.get("times") or []
+                if len(new_times) > len(existing.get("times") or []):
+                    existing["times"] = new_times
+            else:
+                slot_copy = dict(s)
+                slot_index[slot_key] = slot_copy
+                seen[key]["slots"].append(slot_copy)
     deduped = []
     for v in seen.values():
-        v.pop("_slot_keys", None)
+        v.pop("_slot_index", None)
         deduped.append(v)
     return deduped
 
