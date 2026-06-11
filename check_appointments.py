@@ -132,39 +132,72 @@ tell application "Mail"
 end tell'''], check=False)
 
 
+_CENTER_SHORT = {
+    "San Tomas/Santa Clara": "Santa Clara",
+    "Shoreline/Mountain View": "Mountain View",
+}
+
+def _short_center(name):
+    return _CENTER_SHORT.get(name, name)
+
+
+def _slot_date_key(s):
+    try:
+        return datetime.strptime(s.get("date", ""), "%b %d").replace(year=datetime.now().year)
+    except ValueError:
+        return datetime.max
+
+
+def _build_grouped_body(findings):
+    """Return email body grouped by (service, center, provider) with dates indented."""
+    from collections import defaultdict
+
+    groups = defaultdict(list)
+    for f in findings:
+        center = _short_center(f["center"])
+        for s in f["slots"]:
+            key = (f["service"], center, s.get("provider") or "")
+            groups[key].append(s)
+
+    # Sort each group's slots by date
+    for key in groups:
+        groups[key].sort(key=_slot_date_key)
+
+    lines = []
+    for key in sorted(groups):
+        service, center, provider = key
+        header = f"{service} @ {center}"
+        if provider:
+            header += f" — {provider}"
+        lines.append(header)
+        for s in groups[key]:
+            slot_count = len(s.get("times") or []) or s.get("visits", 0)
+            label = s.get("label", s.get("date", "?"))
+            date_line = f"  {label}"
+            if slot_count:
+                date_line += f" ({slot_count} slot{'s' if slot_count != 1 else ''})"
+            if s.get("times"):
+                date_line += ": " + ", ".join(s["times"])
+            lines.append(date_line)
+        lines.append("")
+
+    return "\n".join(lines).rstrip()
+
+
 def fire_notifications(findings, cfg):
     if DRY_RUN:
         log.info("--dry-run set — skipping notifications")
         return
     n = cfg["notify"]
     total = sum(len(f["slots"]) for f in findings)
-    summary = ", ".join(f"{f['service']} @ {f['center']} ({len(f['slots'])})" for f in findings[:5])
+    summary = ", ".join(
+        f"{f['service']} @ {_short_center(f['center'])} ({len(f['slots'])})"
+        for f in findings[:5]
+    )
     title = f"Crossover: {total} slot(s) found"
 
-    def slot_date_key(item):
-        _, s = item
-        raw = s.get("date", "")
-        try:
-            return datetime.strptime(raw, "%b %d").replace(year=datetime.now().year)
-        except ValueError:
-            return datetime.max
-
-    all_slots = [(f, s) for f in findings for s in f["slots"]]
-    all_slots.sort(key=slot_date_key)
-
-    lines = []
-    for f, s in all_slots:
-        line = f"- {f['service']} | {f['center']} | {s.get('label', s.get('date'))}"
-        slot_count = len(s.get("times") or []) or s.get("visits", 0)
-        if slot_count:
-            line += f" ({slot_count} slot{'s' if slot_count != 1 else ''})"
-        if s.get("provider"):
-            line += f" with {s['provider']}"
-        if s.get("times"):
-            line += " — " + ", ".join(s["times"])
-        lines.append(line)
     booking_url = findings[0].get("booking_url", scraper.PORTAL_URL)
-    long_body = f"{title}\n\n" + "\n".join(lines) + f"\n\nBook now: {booking_url}"
+    long_body = f"{title}\n\n{_build_grouped_body(findings)}\n\nBook now: {booking_url}"
 
     log.info(f"NOTIFY: {title}")
     if n.get("mac_banner"):     notify_mac(title, summary)

@@ -101,36 +101,80 @@ async def snap(page, name):
         log.debug(f"snap '{name}' failed: {e}")
 
 
+_CENTER_SHORT = {
+    "San Tomas/Santa Clara": "Santa Clara",
+    "Shoreline/Mountain View": "Mountain View",
+}
+
+def _short_center(name):
+    return _CENTER_SHORT.get(name, name)
+
+
+def _slot_date_key(s):
+    try:
+        return datetime.strptime(s.get("date", ""), "%b %d").replace(year=datetime.now().year)
+    except ValueError:
+        return datetime.max
+
+
+def _build_grouped_body(findings):
+    """Return email body grouped by (service, center, provider) with dates indented."""
+    from collections import defaultdict
+
+    groups = defaultdict(list)
+    for f in findings:
+        center = _short_center(f["center"])
+        for s in f["slots"]:
+            key = (f["service"], center, s.get("provider") or "")
+            groups[key].append(s)
+
+    for key in groups:
+        groups[key].sort(key=_slot_date_key)
+
+    lines = []
+    for key in sorted(groups):
+        service, center, provider = key
+        header = f"{service} @ {center}"
+        if provider:
+            header += f" — {provider}"
+        lines.append(header)
+        for s in groups[key]:
+            slot_count = len(s.get("times") or []) or s.get("visits", 0)
+            label = s.get("label", s.get("date", "?"))
+            date_line = f"  {label}"
+            if slot_count:
+                date_line += f" ({slot_count} slot{'s' if slot_count != 1 else ''})"
+            if s.get("times"):
+                date_line += ": " + ", ".join(s["times"])
+            lines.append(date_line)
+        lines.append("")
+
+    return "\n".join(lines).rstrip()
+
+
 def build_messages(findings):
     total = sum(len(f["slots"]) for f in findings)
     subject = f"Crossover: {total} slot(s) found"
-    short_lines, long_lines = [], [subject, ""]
-
-    def slot_date_key(item):
-        _, s = item
-        try:
-            return datetime.strptime(s.get("date", ""), "%b %d").replace(year=datetime.now().year)
-        except ValueError:
-            return datetime.max
-
-    all_slots = sorted([(f, s) for f in findings for s in f["slots"]], key=slot_date_key)
-
-    for f, s in all_slots:
-        base = f"{f['service']} @ {f['center']} — {s.get('label', s.get('date', '?'))}"
-        # Prefer the number of actual time slots we captured; the day-card
-        # "N visit" count is approximate.
-        slot_count = len(s.get("times") or []) or s.get("visits", 0)
-        if slot_count:
-            base += f" ({slot_count} slot{'s' if slot_count != 1 else ''})"
-        if s.get("provider"):
-            base += f" with {s['provider']}"
-        if s.get("times"):
-            base += " — " + ", ".join(s["times"])
-        short_lines.append(base)
-        long_lines.append("• " + base)
     booking_url = findings[0].get("booking_url", scraper.PORTAL_URL)
-    long_lines += ["", f"Book now: {booking_url}"]
-    return subject, "\n".join(short_lines), "\n".join(long_lines), booking_url
+
+    body = subject + "\n\n" + _build_grouped_body(findings) + "\n\nBook now: " + booking_url
+
+    # SMS: one line per group header (no dates) to stay short
+    short_lines = []
+    seen = set()
+    for f in findings:
+        center = _short_center(f["center"])
+        for s in f["slots"]:
+            key = (f["service"], center, s.get("provider") or "")
+            if key not in seen:
+                seen.add(key)
+                service, ctr, provider = key
+                line = f"{service} @ {ctr}"
+                if provider:
+                    line += f" — {provider}"
+                short_lines.append(line)
+
+    return subject, "\n".join(short_lines), body, booking_url
 
 
 def send_notifications(findings):
