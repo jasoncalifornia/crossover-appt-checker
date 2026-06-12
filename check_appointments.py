@@ -174,8 +174,6 @@ def _build_grouped_body(findings):
             slot_count = len(s.get("times") or []) or s.get("visits", 0)
             label = s.get("label", s.get("date", "?"))
             date_line = f"  {label}"
-            if slot_count:
-                date_line += f" ({slot_count} slot{'s' if slot_count != 1 else ''})"
             if s.get("times"):
                 date_line += ": " + ", ".join(s["times"])
             lines.append(date_line)
