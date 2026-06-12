@@ -10,4 +10,3 @@ Acupuncture|San Tomas/Santa Clara|Jul 10|1|Rachel Combs, LAc|2:00 PM,3:30 PM,9:1
 Acupuncture|San Tomas/Santa Clara|Jul 23|3|Rachel Combs, LAc|10:45 AM,2:00 PM,3:30 PM,9:15 AM
 Acupuncture|San Tomas/Santa Clara|Jul 30|4|Rachel Combs, LAc|10:45 AM,2:00 PM,3:30 PM,9:15 AM
 Acupuncture|San Tomas/Santa Clara|Jul 31|3|Rachel Combs, LAc|10:45 AM,2:00 PM,3:30 PM,9:15 AM
-Acupuncture|San Tomas/Santa Clara|Jul 9|2|Rachel Combs, LAc|2:00 PM,3:30 PM,9:15 AM
