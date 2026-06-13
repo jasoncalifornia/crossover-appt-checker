@@ -148,6 +148,17 @@ def _slot_date_key(s):
         return datetime.max
 
 
+def _sort_times(times):
+    def time_key(t):
+        for fmt in ("%I:%M %p", "%I:%M%p", "%H:%M"):
+            try:
+                return datetime.strptime(t.strip(), fmt)
+            except ValueError:
+                continue
+        return datetime.max
+    return sorted(times, key=time_key)
+
+
 def _build_grouped_body(findings):
     """Return email body grouped by (service, center, provider) with dates indented."""
     from collections import defaultdict
@@ -175,7 +186,7 @@ def _build_grouped_body(findings):
             label = s.get("label", s.get("date", "?"))
             date_line = f"  {label}"
             if s.get("times"):
-                date_line += ": " + ", ".join(s["times"])
+                date_line += ": " + ", ".join(_sort_times(s["times"]))
             lines.append(date_line)
         lines.append("")
 
