@@ -101,13 +101,8 @@ async def snap(page, name):
         log.debug(f"snap '{name}' failed: {e}")
 
 
-_CENTER_SHORT = {
-    "San Tomas/Santa Clara": "Santa Clara",
-    "Shoreline/Mountain View": "Mountain View",
-}
-
 def _short_center(name):
-    return _CENTER_SHORT.get(name, name)
+    return scraper.short_center(name)
 
 
 def _slot_date_key(s):
@@ -190,7 +185,8 @@ def send_notifications(findings):
     subject, short, body, booking_url = build_messages(findings)
     log.info("Sending email...")
     try:
-        resend.Emails.send({"from": FROM_EMAIL, "to": NOTIFY_EMAIL, "subject": subject, "text": body})
+        resend.Emails.send({"from": FROM_EMAIL, "to": NOTIFY_EMAIL, "subject": subject,
+                            "html": scraper.build_html_email(findings), "text": body})
         log.info("Email sent")
     except Exception as e:
         log.error(f"Email failed: {e}")
