@@ -120,16 +120,15 @@ def notify_email(subject, html_body, to=None):
     to = to or NOTIFY_EMAIL
     if not to:
         return
-    # Write HTML to a temp file — avoids AppleScript string escaping entirely
     tmp = "/tmp/crossover_email.html"
     with open(tmp, "w", encoding="utf-8") as f:
         f.write(html_body)
     subj = subject.replace('"', '\\"')
+    # Pass html content in make properties — more reliable than setting after creation
     subprocess.run(["osascript", "-e", f'''
 tell application "Mail"
     set htmlContent to do shell script "cat /tmp/crossover_email.html"
-    set msg to make new outgoing message with properties {{subject:"{subj}", visible:false}}
-    set html content of msg to htmlContent
+    set msg to make new outgoing message with properties {{subject:"{subj}", html content:htmlContent, visible:false}}
     tell msg
         make new to recipient at end of to recipients with properties {{address:"{to}"}}
     end tell
