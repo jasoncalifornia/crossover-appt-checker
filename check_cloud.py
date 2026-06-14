@@ -255,27 +255,40 @@ async def main():
         return
     log.info(f"Config: {len(targets)} target(s), weeks_ahead={cfg['weeks_ahead']}")
 
+    _UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+           "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+    _VIEWPORT = {"width": 1400, "height": 1000}
+    _STATE_FILE = "/tmp/crossover_auth_state.json"
+
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)
-        ctx = await browser.new_context(
-            viewport={"width": 1400, "height": 1000},
-            user_agent=("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-                        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"),
-        )
-        page = await ctx.new_page()
 
-        if not await login(page):
+        # Step 1: login once and save auth state
+        auth_ctx = await browser.new_context(viewport=_VIEWPORT, user_agent=_UA)
+        auth_page = await auth_ctx.new_page()
+        if not await login(auth_page):
             log.error("Login failed")
             await browser.close()
             sys.exit(1)
+        await auth_ctx.storage_state(path=_STATE_FILE)
+        await auth_ctx.close()
+        log.info("Auth state saved — launching parallel target checks")
 
-        all_findings = []
-        for t in targets:
+        # Step 2: run all targets in parallel — each gets its own browser context
+        async def run_target(t):
+            ctx = await browser.new_context(
+                viewport=_VIEWPORT, user_agent=_UA, storage_state=_STATE_FILE,
+            )
             try:
-                all_findings.extend(await scraper.check_target(page, t, cfg["weeks_ahead"]))
+                return await scraper.check_target(ctx, t, cfg["weeks_ahead"])
             except Exception as e:
                 log.exception(f"Error checking {t}: {e}")
-                await snap(page, f"error-{t.get('service','x')}")
+                return []
+            finally:
+                await ctx.close()
+
+        results = await asyncio.gather(*[run_target(t) for t in targets])
+        all_findings = [f for result in results for f in result]
         await browser.close()
 
     if not all_findings:

@@ -400,18 +400,22 @@ async def main():
         log.info("No active targets — nothing to do")
         return
 
+    _UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+           "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=HEADLESS, slow_mo=300 if DEBUG else 0)
-        ctx = await browser.new_context(
+
+        # Step 1: verify/refresh session with a single context
+        auth_ctx = await browser.new_context(
             viewport={"width": 1400, "height": 1000},
-            user_agent=("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-                        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"),
+            user_agent=_UA,
             storage_state=str(STATE_FILE) if STATE_FILE.exists() and not FORCE_LOGIN else None,
         )
-        page = await ctx.new_page()
+        auth_page = await auth_ctx.new_page()
 
         if FORCE_LOGIN:
-            ok = await do_automated_login(page)
+            ok = await do_automated_login(auth_page)
             await browser.close()
             sys.exit(0 if ok else 1)
 
@@ -419,15 +423,28 @@ async def main():
             log.error("No saved session — run --login first")
             await browser.close(); sys.exit(1)
 
-        if not await ensure_session(page):
+        if not await ensure_session(auth_page):
             log.error("Could not establish session"); await browser.close(); sys.exit(1)
 
-        all_findings = []
-        for t in targets:
+        await auth_ctx.close()
+
+        # Step 2: run all targets in parallel — each gets its own browser context
+        async def run_target(t):
+            ctx = await browser.new_context(
+                viewport={"width": 1400, "height": 1000},
+                user_agent=_UA,
+                storage_state=str(STATE_FILE),
+            )
             try:
-                all_findings.extend(await scraper.check_target(page, t, cfg["weeks_ahead"]))
+                return await scraper.check_target(ctx, t, cfg["weeks_ahead"])
             except Exception as e:
                 log.exception(f"Error checking {t}: {e}")
+                return []
+            finally:
+                await ctx.close()
+
+        results = await asyncio.gather(*[run_target(t) for t in targets])
+        all_findings = [f for result in results for f in result]
         await browser.close()
 
     log.info("=" * 70)

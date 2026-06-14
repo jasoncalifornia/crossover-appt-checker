@@ -7,6 +7,7 @@ module handles only the booking-flow navigation and the date-picker
 parsing.
 """
 
+import asyncio
 import re
 import logging
 from playwright.async_api import TimeoutError as PlaywrightTimeout
@@ -239,8 +240,8 @@ async def _fetch_times_for_day(page, day, service, center, visit_types):
     return []
 
 
-async def check_target(page, target, weeks_ahead):
-    """Returns list of findings: [{service, center, slots, booking_url}]."""
+async def check_target(ctx, target, weeks_ahead):
+    """Returns list of findings. ctx is a playwright BrowserContext."""
     service = target["service"]
     visit_types = target.get("visit_types", [])
     centers = target.get("centers", [])
@@ -253,20 +254,25 @@ async def check_target(page, target, weeks_ahead):
 
     for center in centers:
         log.info(f"--- {service} @ {center} ---")
-        if not await _nav_to_date_picker(page, service, center, visit_types):
-            log.info(f"  Could not reach date-picker for {center}")
-            continue
 
-        page_text = await page.inner_text("body")
-        if "no providers available" in page_text.lower():
-            log.info(f"  No providers available at {center}")
-            continue
+        # Phase 1: scan date picker with a dedicated page, then close it
+        page = await ctx.new_page()
+        booking_url = dp = None
+        try:
+            if not await _nav_to_date_picker(page, service, center, visit_types):
+                log.info(f"  Could not reach date-picker for {center}")
+                continue
+            page_text = await page.inner_text("body")
+            if "no providers available" in page_text.lower():
+                log.info(f"  No providers available at {center}")
+                continue
+            booking_url = page.url
+            dp = await scrape_date_picker(page, weeks_ahead)
+        finally:
+            await page.close()
 
-        booking_url = page.url
-        dp = await scrape_date_picker(page, weeks_ahead)
-        slots = dp["available_days"]
-
-        if not slots and dp["next_available_text"]:
+        slots = dp["available_days"] if dp else []
+        if not slots and dp and dp["next_available_text"]:
             slots = [{
                 "label": "Next available",
                 "date": dp["next_available_text"],
@@ -276,13 +282,26 @@ async def check_target(page, target, weeks_ahead):
             }]
             log.info(f"  📣 'Next available: {dp['next_available_text']}' treated as found")
 
-        # Phase 2: re-navigate and fetch precise times for each available day
-        for d in slots:
+        # Phase 2: fetch times in parallel — each day gets its own page (max 3 at once)
+        sem = asyncio.Semaphore(3)
+
+        async def _fetch(d):
             if d.get("label") == "Next available":
-                continue  # came from text, no aria to click
+                return []
             log.info(f"  → fetching times for {d['label']}")
-            d["times"] = await _fetch_times_for_day(page, d, service, center, visit_types)
-            log.info(f"     times: {d['times'] or '(none captured)'}")
+            async with sem:
+                p = await ctx.new_page()
+                try:
+                    times = await _fetch_times_for_day(p, d, service, center, visit_types)
+                    log.info(f"     times: {times or '(none captured)'}")
+                    return times
+                finally:
+                    await p.close()
+
+        time_results = await asyncio.gather(*[_fetch(d) for d in slots])
+        for d, times in zip(slots, time_results):
+            if d.get("label") != "Next available":
+                d["times"] = times
 
         if slots:
             findings.append({
@@ -292,13 +311,11 @@ async def check_target(page, target, weeks_ahead):
                 "booking_url": booking_url,
             })
         else:
+            weeks_scanned = dp["weeks_scanned"] if dp else 0
             log.info(f"  ❌ Confirmed NO appointments at {center} for {service} "
-                     f"(weeks scanned: {dp['weeks_scanned']})")
+                     f"(weeks scanned: {weeks_scanned})")
 
-    # Dedupe findings: same (service, canonical center) with same (date, provider)
-    # gets collapsed — happens when two portal labels point to the same physical clinic.
-    # Times are merged so a failed time-fetch on one pass doesn't produce a duplicate
-    # empty-times entry alongside a successful one.
+    # Dedupe: collapse duplicate (service, center) entries from alias centers
     seen = {}
     for f in findings:
         key = (f["service"], f["center"])
@@ -310,7 +327,6 @@ async def check_target(page, target, weeks_ahead):
         for s in f["slots"]:
             slot_key = (s.get("date"), s.get("provider"))
             if slot_key in slot_index:
-                # Merge times — prefer the richer set
                 existing = slot_index[slot_key]
                 new_times = s.get("times") or []
                 if len(new_times) > len(existing.get("times") or []):
