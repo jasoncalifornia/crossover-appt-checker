@@ -209,29 +209,32 @@ async def _nav_to_date_picker(page, service, center, visit_types):
 
 async def _fetch_times_for_day(page, day, service, center, visit_types):
     """Re-navigate to the date picker, advance to day.week_offset, click the day card, scrape times."""
-    if not await _nav_to_date_picker(page, service, center, visit_types):
-        return []
-    # Advance forward N weeks
-    for _ in range(day.get("week_offset", 0)):
-        if not await click_aria(page, FORWARD_ARIA, timeout=1500):
-            log.debug("  forward arrow gone before reaching target week")
+    for attempt in range(2):
+        if not await _nav_to_date_picker(page, service, center, visit_types):
             return []
-    # Click the day card by aria-label
-    if not await click_aria(page, day["aria"], timeout=2000):
-        log.debug(f"  could not click day {day['aria']}")
-        return []
-    await page.wait_for_timeout(1200)
-    # Collect time-slot button labels (e.g. "10:15 AM" / "3:45 PM")
-    labels = await page.evaluate("""
-        () => Array.from(document.querySelectorAll('button[aria-label], button'))
-            .filter(b => !!(b.offsetWidth && b.offsetHeight))
-            .map(b => (b.getAttribute('aria-label') || b.innerText || '').trim())
-    """)
-    times = set()
-    for s in labels:
-        for t in TIME_PAT.findall(s):
-            times.add(re.sub(r'\s+', '', t).upper().replace('AM', ' AM').replace('PM', ' PM'))
-    return sorted(times)
+        for _ in range(day.get("week_offset", 0)):
+            if not await click_aria(page, FORWARD_ARIA, timeout=1500):
+                log.debug("  forward arrow gone before reaching target week")
+                break
+        else:
+            if not await click_aria(page, day["aria"], timeout=2000):
+                log.debug(f"  could not click day {day['aria']} (attempt {attempt + 1})")
+                continue
+            await page.wait_for_timeout(1200)
+            labels = await page.evaluate("""
+                () => Array.from(document.querySelectorAll('button[aria-label], button'))
+                    .filter(b => !!(b.offsetWidth && b.offsetHeight))
+                    .map(b => (b.getAttribute('aria-label') || b.innerText || '').trim())
+            """)
+            times = set()
+            for s in labels:
+                for t in TIME_PAT.findall(s):
+                    times.add(re.sub(r'\s+', '', t).upper().replace('AM', ' AM').replace('PM', ' PM'))
+            if times:
+                return sorted(times)
+            if attempt == 0:
+                log.info(f"  no times captured for {day['label']}, retrying...")
+    return []
 
 
 async def check_target(page, target, weeks_ahead):

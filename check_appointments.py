@@ -184,6 +184,8 @@ def _build_grouped_body(findings):
         for s in groups[key]:
             slot_count = len(s.get("times") or []) or s.get("visits", 0)
             label = s.get("label", s.get("date", "?"))
+            if not s.get("times") and label != "Next available":
+                continue
             date_line = f"  {label}"
             if s.get("times"):
                 date_line += ": " + ", ".join(_sort_times(s["times"]))
