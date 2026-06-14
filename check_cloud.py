@@ -158,7 +158,7 @@ def _build_grouped_body(findings):
 
 def build_messages(findings):
     total = scraper.displayed_slot_count(findings)
-    subject = f"Crossover: {total} {'slot' if total == 1 else 'slots'} found"
+    subject = f"Crossover: {total} {'time' if total == 1 else 'times'} available"
     booking_url = findings[0].get("booking_url", scraper.PORTAL_URL)
 
     body = subject + "\n\n" + _build_grouped_body(findings) + "\n\nBook now: " + booking_url

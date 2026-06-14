@@ -406,9 +406,13 @@ def _build_groups(findings):
     return groups, group_url
 
 
+def _count_times(slots):
+    return sum(len(s.get("times") or []) for s in slots)
+
+
 def displayed_slot_count(findings):
     groups, _ = _build_groups(findings)
-    return sum(len(v) for v in groups.values())
+    return sum(_count_times(slots) for slots in groups.values())
 
 
 def displayed_slot_count_by_service(findings):
@@ -416,7 +420,7 @@ def displayed_slot_count_by_service(findings):
     groups, _ = _build_groups(findings)
     by_service = defaultdict(int)
     for (service, center, provider), slots in groups.items():
-        by_service[service] += len(slots)
+        by_service[service] += _count_times(slots)
     return dict(by_service)
 
 
@@ -430,10 +434,10 @@ def build_html_email(findings):
     for key in groups:
         groups[key].sort(key=_slot_date_key)
 
-    total_slots = sum(len(v) for v in groups.values())
+    total_times = sum(_count_times(slots) for slots in groups.values())
     by_service = defaultdict(int)
     for (service, _, __), slots in groups.items():
-        by_service[service] += len(slots)
+        by_service[service] += _count_times(slots)
     date_str = now.strftime("%B %-d, %Y")
     time_str = now.strftime("%-I:%M %p")
 
@@ -473,7 +477,7 @@ def build_html_email(findings):
       <div style="font-size:17px;font-weight:700;color:#1c1c1e">{center}</div>
       <div style="font-size:14px;color:#636366;margin-top:1px">{subtitle}</div>
     </div>
-    <span style="background:#FEE8B0;color:#1c1c1e;font-size:12px;font-weight:700;border-radius:20px;padding:5px 12px;white-space:nowrap;flex-shrink:0">{len(slots)} date{"s" if len(slots) != 1 else ""}</span>
+    <span style="background:#FEE8B0;color:#1c1c1e;font-size:12px;font-weight:700;border-radius:20px;padding:5px 12px;white-space:nowrap;flex-shrink:0">{_count_times(slots)} time{"s" if _count_times(slots) != 1 else ""}</span>
   </div>
   <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#636366;margin-bottom:4px">Available Times</div>
   {"".join(rows)}
@@ -498,7 +502,7 @@ def build_html_email(findings):
   </div>
   <div style="font-size:15px;color:rgba(0,0,0,.55);margin-bottom:14px">Crossover Health · {date_str}</div>
   <div style="display:flex;flex-wrap:wrap;gap:6px">
-    <span style="font-size:13px;background:rgba(0,0,0,.1);border-radius:20px;padding:5px 12px;color:rgba(0,0,0,.65)">{total_slots} slot{"s" if total_slots != 1 else ""} total</span>
+    <span style="font-size:13px;background:rgba(0,0,0,.1);border-radius:20px;padding:5px 12px;color:rgba(0,0,0,.65)">{total_times} time{"s" if total_times != 1 else ""} available</span>
     {"".join(
       f'<span style="font-size:13px;background:rgba(0,0,0,.1);border-radius:20px;padding:5px 12px;color:rgba(0,0,0,.65)">{n} {svc}</span>'
       for svc, n in sorted(by_service.items())
