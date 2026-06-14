@@ -116,15 +116,20 @@ end tell'''
             return
 
 
-def notify_email(subject, body, to=None):
+def notify_email(subject, html_body, to=None):
     to = to or NOTIFY_EMAIL
     if not to:
         return
-    safe = body.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+    # Write HTML to a temp file — avoids AppleScript string escaping entirely
+    tmp = "/tmp/crossover_email.html"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(html_body)
     subj = subject.replace('"', '\\"')
     subprocess.run(["osascript", "-e", f'''
 tell application "Mail"
-    set msg to make new outgoing message with properties {{subject:"{subj}", content:"{safe}", visible:false}}
+    set htmlContent to do shell script "cat /tmp/crossover_email.html"
+    set msg to make new outgoing message with properties {{subject:"{subj}", visible:false}}
+    set html content of msg to htmlContent
     tell msg
         make new to recipient at end of to recipients with properties {{address:"{to}"}}
     end tell
@@ -195,6 +200,135 @@ def _build_grouped_body(findings):
     return "\n".join(lines).rstrip()
 
 
+_ICON_CALENDAR     = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+_ICON_ARROW        = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>'
+# Needle: ring handle + long shaft — classic acupuncture icon
+_ICON_ACUPUNCTURE  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><line x1="12" y1="6" x2="12" y2="22"/></svg>'
+# Eye: open eye + pupil
+_ICON_EYE          = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+# Spine vertebrae: stacked rects with connecting lines
+_ICON_CHIRO        = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="4" rx="1"/><rect x="9" y="10" width="6" height="4" rx="1"/><rect x="9" y="18" width="6" height="4" rx="1"/><line x1="12" y1="6" x2="12" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/></svg>'
+# Stick figure with arms out: physical / PT
+_ICON_PT           = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><line x1="12" y1="7" x2="12" y2="16"/><path d="M7 10l5 2 5-2"/><line x1="10" y1="16" x2="8" y2="21"/><line x1="14" y1="16" x2="16" y2="21"/></svg>'
+# Medical cross in circle: default
+_ICON_MEDICAL      = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>'
+
+
+def _service_icon(service):
+    s = service.lower()
+    if any(k in s for k in ("acupuncture", "needle", "acu")):
+        return _ICON_ACUPUNCTURE
+    if any(k in s for k in ("eye", "vision", "optom", "ophthalm")):
+        return _ICON_EYE
+    if any(k in s for k in ("chiro", "spine", "back")):
+        return _ICON_CHIRO
+    if any(k in s for k in ("physical", " pt", "therapy", "rehab")):
+        return _ICON_PT
+    return _ICON_MEDICAL
+
+
+def _build_html_email(findings):
+    from collections import defaultdict
+
+    now = datetime.now()
+
+    groups = defaultdict(list)
+    group_url = {}
+    for f in findings:
+        center = _short_center(f["center"])
+        for s in f["slots"]:
+            if not s.get("times") and s.get("label") != "Next available":
+                continue
+            key = (f["service"], center, s.get("provider") or "")
+            groups[key].append(s)
+            group_url[key] = f.get("booking_url", scraper.PORTAL_URL)
+
+    for key in groups:
+        groups[key].sort(key=_slot_date_key)
+
+    total_slots = sum(len(v) for v in groups.values())
+    date_str  = now.strftime("%B %-d, %Y")
+    time_str  = now.strftime("%-I:%M %p")
+
+    def time_chips(times):
+        return "".join(
+            f'<span style="display:inline-block;background:#FEE8B0;color:#1c1c1e;'
+            f'border-radius:20px;padding:3px 11px;font-size:13px;margin:2px 3px 2px 0;'
+            f'font-weight:500;white-space:nowrap">{t}</span>'
+            for t in _sort_times(times)
+        )
+
+    cards = []
+    for key in sorted(groups):
+        service, center, provider = key
+        slots = groups[key]
+        booking_url = group_url.get(key, scraper.PORTAL_URL)
+        subtitle = service
+        if provider:
+            subtitle += f" · {provider}"
+
+        rows = []
+        for i, s in enumerate(slots):
+            label = s.get("label", s.get("date", "?"))
+            times_html = time_chips(s["times"]) if s.get("times") else ""
+            border = "" if i == len(slots) - 1 else "border-bottom:1px solid #f2f2f7;"
+            rows.append(
+                f'<div style="display:flex;align-items:flex-start;padding:9px 0;{border}">'
+                f'<div style="width:120px;flex-shrink:0;font-size:14px;font-weight:600;color:#1c1c1e;padding-top:3px">{label}</div>'
+                f'<div style="flex:1;line-height:1.8">{times_html}</div>'
+                f'</div>'
+            )
+
+        cards.append(f'''<div style="background:#fff;border-radius:16px;padding:18px;margin-bottom:12px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+    <div style="width:36px;height:36px;border-radius:10px;background:#FEE8B0;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#1c1c1e">
+      {_service_icon(service)}
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:17px;font-weight:700;color:#1c1c1e">{center}</div>
+      <div style="font-size:14px;color:#636366;margin-top:1px">{subtitle}</div>
+    </div>
+    <span style="background:#FEE8B0;color:#1c1c1e;font-size:12px;font-weight:700;border-radius:20px;padding:5px 12px;white-space:nowrap;flex-shrink:0">{len(slots)} date{"s" if len(slots) != 1 else ""}</span>
+  </div>
+  <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#636366;margin-bottom:4px">Available Times</div>
+  {"".join(rows)}
+  <a href="{booking_url}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#FCB533;color:#1c1c1e;text-decoration:none;text-align:center;padding:13px;border-radius:12px;font-weight:700;margin-top:16px;font-size:15px">
+    Book Now {_ICON_ARROW}
+  </a>
+</div>''')
+
+    return f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Crossover Health — Appointment Availability</title>
+</head>
+<body style="font-family:-apple-system,'SF Pro Display',system-ui,sans-serif;background:#f2f2f7;margin:0;padding:16px;color:#1c1c1e;font-size:17px;line-height:1.55;-webkit-text-size-adjust:100%">
+<div style="max-width:600px;margin:0 auto">
+
+<div style="background:#FCB533;color:#1c1c1e;border-radius:20px;padding:24px 20px;margin-bottom:12px">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+    <div style="opacity:.6">{_ICON_CALENDAR}</div>
+    <div style="font-size:26px;font-weight:700;letter-spacing:-.5px">Appointment Availability</div>
+  </div>
+  <div style="font-size:15px;color:rgba(0,0,0,.55);margin-bottom:14px">Crossover Health · {date_str}</div>
+  <div style="display:flex;gap:8px">
+    <span style="font-size:13px;background:rgba(0,0,0,.1);border-radius:20px;padding:5px 12px;color:rgba(0,0,0,.65)">{total_slots} slot{"s" if total_slots != 1 else ""} available</span>
+  </div>
+</div>
+
+{"".join(cards)}
+
+<div style="font-size:12px;color:#8e8e93;text-align:center;padding:8px 0 16px">
+  Checked at {time_str} · Availability changes quickly
+</div>
+
+</div>
+</body>
+</html>'''
+
+
 def fire_notifications(findings, cfg):
     if DRY_RUN:
         log.info("--dry-run set — skipping notifications")
@@ -208,12 +342,11 @@ def fire_notifications(findings, cfg):
     title = f"Crossover: {total} slot(s) found"
 
     booking_url = findings[0].get("booking_url", scraper.PORTAL_URL)
-    long_body = f"{title}\n\n{_build_grouped_body(findings)}\n\nBook now: {booking_url}"
 
     log.info(f"NOTIFY: {title}")
     if n.get("mac_banner"):     notify_mac(title, summary)
     if n.get("imessage"):       notify_imessage(NOTIFY_PHONE, f"{title}\n{summary}\n{booking_url}")
-    if n.get("email"):          notify_email(title, long_body)
+    if n.get("email"):          notify_email(title, _build_html_email(findings))
     if n.get("open_browser"):   subprocess.run(["open", booking_url], check=False)
 
 
