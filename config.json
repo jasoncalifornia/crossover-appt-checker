@@ -6,7 +6,7 @@
     "mac_banner": true,
     "imessage": true,
     "email": true,
-    "open_browser": true
+    "open_browser": false
   },
   "check_window": {
     "weekday_start": 7,
