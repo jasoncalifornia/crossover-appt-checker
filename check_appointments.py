@@ -140,6 +140,7 @@ end tell'''], check=False)
 _CENTER_SHORT = {
     "San Tomas/Santa Clara": "Santa Clara",
     "Shoreline/Mountain View": "Mountain View",
+    "Sunnyvale/Mathilda": "Sunnyvale",
 }
 
 def _short_center(name):

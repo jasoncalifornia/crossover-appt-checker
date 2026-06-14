@@ -22,6 +22,8 @@ CENTER_ALIASES = {
     "mountain view": "Shoreline/Mountain View",
     "san tomas": "San Tomas/Santa Clara",
     "santa clara": "San Tomas/Santa Clara",
+    "sunnyvale": "Sunnyvale/Mathilda",
+    "mathilda": "Sunnyvale/Mathilda",
 }
 
 

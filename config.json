@@ -19,6 +19,18 @@
       "visit_types": ["Acupuncture Follow-Up"],
       "centers": ["Shoreline", "Mountain View", "San Tomas", "Santa Clara"],
       "check_until": null
+    },
+    {
+      "service": "Chiropractic",
+      "visit_types": ["Chiropractic Follow Up"],
+      "centers": ["San Tomas", "Santa Clara"],
+      "check_until": null
+    },
+    {
+      "service": "Optometry",
+      "visit_types": ["Optometry Annual Exam"],
+      "centers": ["Sunnyvale", "Mathilda"],
+      "check_until": null
     }
   ]
 }
