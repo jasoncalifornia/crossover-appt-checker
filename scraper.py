@@ -390,19 +390,9 @@ def _service_icon(service):
     return _ICON_MEDICAL
 
 
-def displayed_slot_count(findings):
-    """Count slots that will actually appear in the email (have times or are Next available)."""
-    return sum(
-        1 for f in findings for s in f["slots"]
-        if s.get("times") or s.get("label") == "Next available"
-    )
-
-
-def build_html_email(findings):
+def _build_groups(findings):
+    """Shared grouping logic used by both the HTML builder and slot counters."""
     from collections import defaultdict
-    from datetime import datetime
-
-    now = datetime.now()
     groups = defaultdict(list)
     group_url = {}
     for f in findings:
@@ -413,11 +403,37 @@ def build_html_email(findings):
             key = (f["service"], center, s.get("provider") or "")
             groups[key].append(s)
             group_url[key] = f.get("booking_url", PORTAL_URL)
+    return groups, group_url
+
+
+def displayed_slot_count(findings):
+    groups, _ = _build_groups(findings)
+    return sum(len(v) for v in groups.values())
+
+
+def displayed_slot_count_by_service(findings):
+    from collections import defaultdict
+    groups, _ = _build_groups(findings)
+    by_service = defaultdict(int)
+    for (service, center, provider), slots in groups.items():
+        by_service[service] += len(slots)
+    return dict(by_service)
+
+
+def build_html_email(findings):
+    from collections import defaultdict
+    from datetime import datetime
+
+    now = datetime.now()
+    groups, group_url = _build_groups(findings)
 
     for key in groups:
         groups[key].sort(key=_slot_date_key)
 
     total_slots = sum(len(v) for v in groups.values())
+    by_service = defaultdict(int)
+    for (service, _, __), slots in groups.items():
+        by_service[service] += len(slots)
     date_str = now.strftime("%B %-d, %Y")
     time_str = now.strftime("%-I:%M %p")
 
@@ -481,8 +497,12 @@ def build_html_email(findings):
     <div style="font-size:26px;font-weight:700;letter-spacing:-.5px">Appointment Availability</div>
   </div>
   <div style="font-size:15px;color:rgba(0,0,0,.55);margin-bottom:14px">Crossover Health · {date_str}</div>
-  <div style="display:flex;gap:8px">
-    <span style="font-size:13px;background:rgba(0,0,0,.1);border-radius:20px;padding:5px 12px;color:rgba(0,0,0,.65)">{total_slots} slot{"s" if total_slots != 1 else ""} available</span>
+  <div style="display:flex;flex-wrap:wrap;gap:6px">
+    <span style="font-size:13px;background:rgba(0,0,0,.1);border-radius:20px;padding:5px 12px;color:rgba(0,0,0,.65)">{total_slots} slot{"s" if total_slots != 1 else ""} total</span>
+    {"".join(
+      f'<span style="font-size:13px;background:rgba(0,0,0,.1);border-radius:20px;padding:5px 12px;color:rgba(0,0,0,.65)">{n} {svc}</span>'
+      for svc, n in sorted(by_service.items())
+    )}
   </div>
 </div>
 {"".join(cards)}
