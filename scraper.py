@@ -390,6 +390,14 @@ def _service_icon(service):
     return _ICON_MEDICAL
 
 
+def displayed_slot_count(findings):
+    """Count slots that will actually appear in the email (have times or are Next available)."""
+    return sum(
+        1 for f in findings for s in f["slots"]
+        if s.get("times") or s.get("label") == "Next available"
+    )
+
+
 def build_html_email(findings):
     from collections import defaultdict
     from datetime import datetime

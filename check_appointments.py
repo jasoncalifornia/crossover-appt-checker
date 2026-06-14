@@ -146,12 +146,12 @@ def fire_notifications(findings, cfg):
         log.info("--dry-run set — skipping notifications")
         return
     n = cfg["notify"]
-    total = sum(len(f["slots"]) for f in findings)
+    total = scraper.displayed_slot_count(findings)
     summary = ", ".join(
         f"{f['service']} @ {scraper.short_center(f['center'])} ({len(f['slots'])})"
         for f in findings[:5]
     )
-    title = f"Crossover: {total} slot(s) found"
+    title = f"Crossover: {total} {'slot' if total == 1 else 'slots'} found"
     booking_url = findings[0].get("booking_url", scraper.PORTAL_URL)
 
     log.info(f"NOTIFY: {title}")
