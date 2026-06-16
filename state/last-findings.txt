@@ -1,7 +1,5 @@
-Acupuncture|San Tomas/Santa Clara|Aug 14|1|Rachel Combs, LAc|
 Acupuncture|San Tomas/Santa Clara|Aug 20|2|Rachel Combs, LAc|10:45 AM,9:15 AM
-Acupuncture|San Tomas/Santa Clara|Aug 27|2|Rachel Combs, LAc|10:45 AM,9:15 AM
-Acupuncture|San Tomas/Santa Clara|Jul 30|1|Rachel Combs, LAc|9:15 AM
+Acupuncture|San Tomas/Santa Clara|Aug 27|1|Rachel Combs, LAc|9:15 AM
 Chiropractic|San Tomas/Santa Clara|Aug 10|7|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Aug 12|7|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Aug 13|7|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
@@ -67,7 +65,7 @@ Optometry|Sunnyvale/Mathilda|Aug 6|7|Annie Low, OD|10:00 AM,10:45 AM,2:15 PM,3:0
 Optometry|Sunnyvale/Mathilda|Aug 7|3|Annie Low, OD|10:00 AM,10:45 AM,2:15 PM,3:00 PM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Jul 10|4|Annie Low, OD|10:00 AM,10:45 AM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Jul 13|7|Annie Low, OD|10:00 AM,10:45 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
-Optometry|Sunnyvale/Mathilda|Jul 14|7|Titi Le, OD|10:00 AM,10:45 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Jul 14|6|Titi Le, OD|10:00 AM,10:45 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Jul 15|8|Titi Le, OD|10:00 AM,10:45 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Jul 16|6|Barbara Nguyen, OD|10:00 AM,10:45 AM,1:00 PM,1:45 PM,2:30 PM,3:15 PM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Jul 17|5|Barbara Nguyen, OD|10:00 AM,10:45 AM,1:00 PM,8:30 AM,9:15 AM
