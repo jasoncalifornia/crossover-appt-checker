@@ -428,7 +428,8 @@ def build_html_email(findings):
     from collections import defaultdict
     from datetime import datetime
 
-    now = datetime.now()
+    from zoneinfo import ZoneInfo
+    now = datetime.now(tz=ZoneInfo("America/Los_Angeles"))
     groups, group_url = _build_groups(findings)
 
     for key in groups:
@@ -439,7 +440,7 @@ def build_html_email(findings):
     for (service, _, __), slots in groups.items():
         by_service[service] += _count_times(slots)
     date_str = now.strftime("%B %-d, %Y")
-    time_str = now.strftime("%-I:%M %p")
+    time_str = now.strftime("%-I:%M %p PT")
 
     def time_chips(times):
         return "".join(
