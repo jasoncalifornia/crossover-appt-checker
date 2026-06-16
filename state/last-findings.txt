@@ -1,5 +1,5 @@
-Acupuncture|San Tomas/Santa Clara|Aug 14|2|Rachel Combs, LAc|10:45 AM,3:30 PM,9:15 AM
-Acupuncture|San Tomas/Santa Clara|Aug 20|2|Rachel Combs, LAc|
+Acupuncture|San Tomas/Santa Clara|Aug 14|2|Rachel Combs, LAc|
+Acupuncture|San Tomas/Santa Clara|Aug 20|2|Rachel Combs, LAc|10:45 AM,3:30 PM,9:15 AM
 Acupuncture|San Tomas/Santa Clara|Aug 27|3|Rachel Combs, LAc|10:45 AM,3:30 PM,9:15 AM
 Acupuncture|San Tomas/Santa Clara|Jul 30|2|Rachel Combs, LAc|3:30 PM,9:15 AM
 Chiropractic|San Tomas/Santa Clara|Aug 10|7|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
