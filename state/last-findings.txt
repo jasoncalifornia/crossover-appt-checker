@@ -1,3 +1,4 @@
+Acupuncture|Shoreline/Mountain View|Jul 7|1|Rachel Combs, LAc|9:45 AM
 Chiropractic|San Tomas/Santa Clara|Aug 10|7|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Aug 12|7|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Aug 13|7|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
@@ -10,11 +11,11 @@ Chiropractic|San Tomas/Santa Clara|Aug 27|7|Daniel Axelrod, DC|10:30 AM,12:10 PM
 Chiropractic|San Tomas/Santa Clara|Aug 31|7|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Aug 5|7|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Aug 6|7|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
-Chiropractic|San Tomas/Santa Clara|Jul 1|1|Daniel Axelrod, DC|2:30 PM,3:50 PM,8:30 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Jul 1|1|Daniel Axelrod, DC|2:30 PM,3:50 PM,8:30 AM
 Chiropractic|San Tomas/Santa Clara|Jul 13|6|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Jul 15|7|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Jul 16|5|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
-Chiropractic|San Tomas/Santa Clara|Jul 2|3|Daniel Axelrod, DC|10:30 AM,12:10 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Jul 2|2|Daniel Axelrod, DC|10:30 AM,12:10 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Jul 20|7|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Jul 22|7|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Jul 23|7|Daniel Axelrod, DC|10:30 AM,12:10 PM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
