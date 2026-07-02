@@ -63,7 +63,7 @@ Optometry|Sunnyvale/Mathilda|Jul 16|4|Barbara Nguyen, OD|10:00 AM,10:45 AM,2:30 
 Optometry|Sunnyvale/Mathilda|Jul 17|2|Barbara Nguyen, OD|10:00 AM,10:45 AM
 Optometry|Sunnyvale/Mathilda|Jul 20|1|Annie Low, OD|10:45 AM,1:30 PM,2:15 PM,3:00 PM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Jul 21|6|Annie Low, OD|10:00 AM,10:45 AM,1:30 PM,2:15 PM,3:00 PM,8:30 AM,9:15 AM
-Optometry|Sunnyvale/Mathilda|Jul 22|4|Annie Low, OD|10:00 AM,10:45 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Jul 22|3|Annie Low, OD|10:00 AM,10:45 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Jul 23|8|Annie Low, OD|10:00 AM,10:45 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Jul 24|3|Annie Low, OD|10:00 AM,10:45 AM,2:15 PM,3:00 PM,3:45 PM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Jul 27|5|Annie Low, OD|10:00 AM,10:45 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM
