@@ -181,7 +181,7 @@ def build_messages(findings):
     return subject, "\n".join(short_lines), body, booking_url
 
 
-def send_notifications(findings):
+def send_notifications(findings, cfg):
     subject, short, body, booking_url = build_messages(findings)
     log.info("Sending email...")
     try:
@@ -190,6 +190,9 @@ def send_notifications(findings):
         log.info("Email sent")
     except Exception as e:
         log.error(f"Email failed: {e}")
+    if not cfg.get("notify", {}).get("sms", True):
+        log.info("SMS disabled in config — skipping")
+        return
     log.info("Sending SMS...")
     try:
         sms = f"{short}\n\n{booking_url}"[:480]
@@ -304,7 +307,7 @@ async def main():
         return
     LAST_FINDINGS.write_text(sig)
     log.info(f"State updated → {LAST_FINDINGS.relative_to(ROOT)} ({len(sig)} chars)")
-    send_notifications(all_findings)
+    send_notifications(all_findings, cfg)
 
 
 if __name__ == "__main__":

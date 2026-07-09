@@ -6,6 +6,7 @@
     "mac_banner": true,
     "imessage": true,
     "email": true,
+    "sms": false,
     "open_browser": false
   },
   "check_window": {
