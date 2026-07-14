@@ -224,15 +224,31 @@ async def _fetch_times_for_day(page, day, service, center, visit_types):
                 log.debug(f"  could not click day {day['aria']} (attempt {attempt + 1})")
                 continue
             await page.wait_for_timeout(1200)
-            labels = await page.evaluate("""
-                () => Array.from(document.querySelectorAll('button[aria-label], button'))
-                    .filter(b => !!(b.offsetWidth && b.offsetHeight))
-                    .map(b => (b.getAttribute('aria-label') || b.innerText || '').trim())
+            # The "Choose time" flyout stacks the clicked day PLUS several extra
+            # upcoming days below it (each headed by a `[class*="slotDateBold"]`
+            # span like "Jul 15"), all in one panel with no per-day container.
+            # A flat button query (old approach) scoops up every day's times and
+            # attributes all of them to the clicked day. Walk the panel in
+            # document order instead and only collect buttons between this day's
+            # date heading and the next one.
+            entries = await page.evaluate("""
+                () => Array.from(document.querySelectorAll('[class*="slotDateBold"], button'))
+                    .filter(n => !!(n.offsetWidth && n.offsetHeight))
+                    .map(n => ({
+                        isDate: n.matches('[class*="slotDateBold"]'),
+                        text: (n.innerText || n.getAttribute('aria-label') || '').trim(),
+                    }))
             """)
+            target_date = day["date"]  # e.g. "Jul 15" — matches the heading's text exactly
             times = set()
-            for s in labels:
-                for t in TIME_PAT.findall(s):
-                    times.add(re.sub(r'\s+', '', t).upper().replace('AM', ' AM').replace('PM', ' PM'))
+            capturing = False
+            for e in entries:
+                if e["isDate"]:
+                    capturing = (e["text"] == target_date)
+                    continue
+                if capturing:
+                    for t in TIME_PAT.findall(e["text"]):
+                        times.add(re.sub(r'\s+', '', t).upper().replace('AM', ' AM').replace('PM', ' PM'))
             if times:
                 return sorted(times)
             if attempt == 0:
