@@ -329,8 +329,17 @@ async def check_target(ctx, target, weeks_ahead):
             if slot_key in slot_index:
                 existing = slot_index[slot_key]
                 new_times = s.get("times") or []
-                if len(new_times) > len(existing.get("times") or []):
+                if new_times:
+                    # Both entries are re-scraped fresh every run from alias center
+                    # names (e.g. "San Tomas" / "Santa Clara") that point at the same
+                    # physical location. Preferring whichever fetch was longer let a
+                    # stale/phantom extra time (already booked elsewhere) persist
+                    # indefinitely, since it would always "win" against the correct,
+                    # shorter list on every subsequent run. Trust the latest successful
+                    # fetch instead; only fall back to a prior alias's times if this
+                    # one came back empty (a failed/incomplete fetch).
                     existing["times"] = new_times
+                    existing["visits"] = s.get("visits", existing.get("visits"))
             else:
                 slot_copy = dict(s)
                 slot_index[slot_key] = slot_copy
