@@ -35,7 +35,6 @@ Chiropractic|San Tomas/Santa Clara|Sep 3|7|Daniel Axelrod, DC|10:30 AM,11:50 AM,
 Chiropractic|San Tomas/Santa Clara|Sep 30|7|Daniel Axelrod, DC|10:30 AM,11:50 AM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Sep 7|7|Daniel Axelrod, DC|10:30 AM,11:50 AM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Sep 9|7|Daniel Axelrod, DC|10:30 AM,11:50 AM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
-Optometry|Sunnyvale/Mathilda|Aug 11|1|Annie Low, OD|3:45 PM
 Optometry|Sunnyvale/Mathilda|Aug 11|1|Titi Le, OD|8:30 AM
 Optometry|Sunnyvale/Mathilda|Aug 12|1|Annie Low, OD|9:15 AM
 Optometry|Sunnyvale/Mathilda|Aug 13|1|Annie Low, OD|2:15 PM
