@@ -101,6 +101,24 @@ async def get_day_cards(page):
 
 # ─── Booking-flow navigation ──────────────────────────────────────────────────
 
+async def dismiss_promo_modal(page):
+    """Portal occasionally shows a full-screen promo/announcement modal (e.g. the
+    Aug 2026 "Wellness Crossover Giveaway") that overlays the dashboard and blocks
+    every click, including "Get Care Now", until dismissed. Best-effort close."""
+    for sel in ['button:has-text("Got it")', 'button:has-text("Close")',
+                'button[aria-label="Close"]', 'button[aria-label="close"]']:
+        try:
+            el = page.locator(sel).first
+            if await el.is_visible(timeout=1500):
+                await el.click()
+                log.info(f"Dismissed promo modal via {sel!r}")
+                await page.wait_for_timeout(500)
+                return True
+        except Exception:
+            continue
+    return False
+
+
 async def navigate_to_centers(page, service):
     """Portal home → Get Care Now → service → By Visit. Lands on the centers list."""
     # domcontentloaded (not networkidle) — portal keeps long-lived XHR/sockets
@@ -114,10 +132,19 @@ async def navigate_to_centers(page, service):
     except Exception:
         log.warning("Get Care Now button never rendered within 30s")
         return False
-    if not await click_first_visible(page, [
+    await dismiss_promo_modal(page)
+    get_care_now = [
         'button:has-text("Get Care Now")', 'a:has-text("Get Care Now")',
-    ]):
+    ]
+    clicked = await click_first_visible(page, get_care_now)
+    if not clicked:
         log.warning("Get Care Now button visible but not clickable")
+        # Modal may have appeared right as we tried to click — retry once after dismissing.
+        if await dismiss_promo_modal(page):
+            clicked = await click_first_visible(page, get_care_now)
+            if not clicked:
+                log.warning("Get Care Now still not clickable after dismissing modal")
+    if not clicked:
         try:
             import time
             from pathlib import Path
