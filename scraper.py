@@ -55,7 +55,8 @@ async def click_first_visible(page, selectors, timeout=2500):
             if await el.is_visible(timeout=timeout):
                 await el.click()
                 return True
-        except Exception:
+        except Exception as e:
+            log.warning(f"click_first_visible({sel!r}) failed: {e}")
             continue
     return False
 
@@ -117,6 +118,14 @@ async def navigate_to_centers(page, service):
         'button:has-text("Get Care Now")', 'a:has-text("Get Care Now")',
     ]):
         log.warning("Get Care Now button visible but not clickable")
+        try:
+            import time
+            from pathlib import Path
+            debug_dir = Path("/tmp/screenshots")
+            debug_dir.mkdir(parents=True, exist_ok=True)
+            await page.screenshot(path=str(debug_dir / f"getcarenow-blocked-{int(time.time())}.png"), full_page=True)
+        except Exception as e:
+            log.debug(f"debug screenshot failed: {e}")
         return False
     await page.wait_for_load_state("networkidle", timeout=15000)
     await page.wait_for_timeout(1200)
