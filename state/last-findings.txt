@@ -1,6 +1,5 @@
-Acupuncture|San Tomas/Santa Clara|Aug 13|1|Rachel Combs, LAc|2:00 PM
 Chiropractic|San Tomas/Santa Clara|Aug 17|1|Daniel Axelrod, DC|11:50 AM
-Chiropractic|San Tomas/Santa Clara|Aug 19|3|Daniel Axelrod, DC|1:50 PM,2:30 PM,3:50 PM
+Chiropractic|San Tomas/Santa Clara|Aug 19|1|Daniel Axelrod, DC|2:30 PM
 Chiropractic|San Tomas/Santa Clara|Aug 20|4|Daniel Axelrod, DC|10:30 AM,1:50 PM,3:50 PM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Aug 24|5|Daniel Axelrod, DC|10:30 AM,1:50 PM,2:30 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Aug 26|7|Daniel Axelrod, DC|10:30 AM,11:50 AM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
