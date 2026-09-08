@@ -1,3 +1,4 @@
+Acupuncture|Shoreline/Mountain View|Sep 9|1|Rachel Combs, LAc|11:15 AM
 Chiropractic|San Tomas/Santa Clara|Nov 11|7|Daniel Axelrod, DC|10:30 AM,11:50 AM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Nov 12|7|Daniel Axelrod, DC|10:30 AM,11:50 AM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Nov 16|7|Daniel Axelrod, DC|10:30 AM,11:50 AM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
@@ -53,7 +54,7 @@ Optometry|Sunnyvale/Mathilda|Oct 14|8|Annie Low, OD|10:30 AM,11:15 AM,1:30 PM,2:
 Optometry|Sunnyvale/Mathilda|Oct 15|8|Annie Low, OD|10:30 AM,11:15 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Oct 16|4|Annie Low, OD|10:00 AM,10:45 AM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Oct 19|7|Annie Low, OD|10:30 AM,11:15 AM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
-Optometry|Sunnyvale/Mathilda|Oct 2|2|Annie Low, OD|10:45 AM,8:30 AM
+Optometry|Sunnyvale/Mathilda|Oct 2|3|Annie Low, OD|10:00 AM,10:45 AM,8:30 AM
 Optometry|Sunnyvale/Mathilda|Oct 20|4|Annie Low, OD|1:30 PM,2:15 PM,3:00 PM,3:45 PM
 Optometry|Sunnyvale/Mathilda|Oct 20|4|Titi Le, OD|10:00 AM,10:45 AM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Oct 21|6|Annie Low, OD|10:45 AM,1:30 PM,2:15 PM,3:00 PM,8:30 AM,9:15 AM
@@ -69,15 +70,13 @@ Optometry|Sunnyvale/Mathilda|Oct 5|5|Titi Le, OD|10:30 AM,11:15 AM,3:00 PM,8:30 
 Optometry|Sunnyvale/Mathilda|Oct 6|7|Titi Le, OD|11:15 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Oct 7|7|Annie Low, OD|10:30 AM,11:15 AM,1:30 PM,2:15 PM,3:00 PM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Oct 8|8|Annie Low, OD|10:00 AM,11:15 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
-Optometry|Sunnyvale/Mathilda|Oct 9|2|Annie Low, OD|8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Oct 9|1|Annie Low, OD|8:30 AM
 Optometry|Sunnyvale/Mathilda|Sep 21|2|Annie Low, OD|8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Sep 22|1|Annie Low, OD|3:00 PM
 Optometry|Sunnyvale/Mathilda|Sep 22|2|Titi Le, OD|10:00 AM,8:30 AM
 Optometry|Sunnyvale/Mathilda|Sep 23|3|Barbara Nguyen, OD|1:30 PM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Sep 24|6|Annie Low, OD|10:30 AM,11:15 AM,2:15 PM,3:00 PM,3:45 PM,9:15 AM
-Optometry|Sunnyvale/Mathilda|Sep 25|1|Annie Low, OD|10:00 AM
 Optometry|Sunnyvale/Mathilda|Sep 28|7|Annie Low, OD|10:30 AM,11:15 AM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Sep 29|4|Annie Low, OD|1:30 PM,2:15 PM,3:00 PM,3:45 PM
 Optometry|Sunnyvale/Mathilda|Sep 29|3|Titi Le, OD|10:00 AM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Sep 30|5|Annie Low, OD|10:00 AM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
-Optometry|Sunnyvale/Mathilda|Sep 8|1|Annie Low, OD|3:00 PM
