@@ -57,4 +57,3 @@ Optometry|Sunnyvale/Mathilda|Oct 5|1|Titi Le, OD|11:15 AM
 Optometry|Sunnyvale/Mathilda|Oct 6|2|Titi Le, OD|1:30 PM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Oct 7|1|Annie Low, OD|8:30 AM
 Optometry|Sunnyvale/Mathilda|Oct 8|2|Annie Low, OD|8:30 AM,9:15 AM
-Optometry|Sunnyvale/Mathilda|Sep 25|1|Annie Low, OD|8:30 AM
