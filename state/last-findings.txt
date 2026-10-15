@@ -60,8 +60,8 @@ Optometry|Sunnyvale/Mathilda|Nov 23|7|Titi Le, OD|10:30 AM,11:15 AM,1:30 PM,2:15
 Optometry|Sunnyvale/Mathilda|Nov 24|7|Titi Le, OD|10:30 AM,11:15 AM,1:30 PM,2:15 PM,3:30 PM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Nov 3|3|Titi Le, OD|10:00 AM,10:45 AM,8:30 AM
 Optometry|Sunnyvale/Mathilda|Nov 30|7|Annie Low, OD|10:30 AM,11:15 AM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
-Optometry|Sunnyvale/Mathilda|Nov 4|4|Annie Low, OD|10:30 AM,11:15 AM,2:15 PM,3:00 PM
-Optometry|Sunnyvale/Mathilda|Nov 5|6|Annie Low, OD|10:30 AM,11:15 AM,1:30 PM,2:15 PM,3:00 PM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Nov 4|1|Annie Low, OD|10:30 AM
+Optometry|Sunnyvale/Mathilda|Nov 5|5|Annie Low, OD|10:30 AM,11:15 AM,1:30 PM,2:15 PM,3:00 PM
 Optometry|Sunnyvale/Mathilda|Nov 6|3|Annie Low, OD|10:45 AM,8:30 AM,9:15 AM
 Optometry|Sunnyvale/Mathilda|Nov 9|5|Annie Low, OD|10:30 AM,11:15 AM,2:15 PM,3:00 PM,8:30 AM
 Optometry|Sunnyvale/Mathilda|Oct 27|1|Titi Le, OD|8:30 AM
