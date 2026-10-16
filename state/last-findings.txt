@@ -21,7 +21,7 @@ Chiropractic|San Tomas/Santa Clara|Nov 5|9|Daniel Axelrod, DC|10:30 AM,11:10 AM,
 Chiropractic|San Tomas/Santa Clara|Nov 9|9|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,8:30 AM,9:10 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Oct 19|1|Daniel Axelrod, DC|9:10 AM
 Chiropractic|San Tomas/Santa Clara|Oct 21|2|Daniel Axelrod, DC|10:30 AM,11:10 AM
-Chiropractic|San Tomas/Santa Clara|Oct 22|5|Daniel Axelrod, DC|11:50 AM,1:50 PM,2:30 PM,8:30 AM,9:10 AM
+Chiropractic|San Tomas/Santa Clara|Oct 22|5|Daniel Axelrod, DC|11:50 AM,2:30 PM,8:30 AM,9:10 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Oct 26|9|Daniel Axelrod, DC|10:30 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
 Chiropractic|San Tomas/Santa Clara|Oct 28|6|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,2:30 PM,3:10 PM,9:10 AM
 Chiropractic|San Tomas/Santa Clara|Oct 29|8|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,3:10 PM,8:30 AM,9:10 AM,9:50 AM
