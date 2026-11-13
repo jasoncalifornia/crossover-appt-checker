@@ -107,7 +107,13 @@ def _short_center(name):
 
 def _slot_date_key(s):
     try:
-        return datetime.strptime(s.get("date", ""), "%b %d").replace(year=datetime.now().year)
+        today = datetime.now()
+        d = datetime.strptime(s.get("date", ""), "%b %d").replace(year=today.year)
+        # See scraper._slot_date_key: a date that's >180 "days ago" under the
+        # current year actually wrapped forward into next year.
+        if (today - d).days > 180:
+            d = d.replace(year=today.year + 1)
+        return d
     except ValueError:
         return datetime.max
 

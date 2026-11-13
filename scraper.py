@@ -416,7 +416,16 @@ def short_center(name):
 def _slot_date_key(s):
     from datetime import datetime
     try:
-        return datetime.strptime(s.get("date", ""), "%b %d").replace(year=datetime.now().year)
+        today = datetime.now()
+        d = datetime.strptime(s.get("date", ""), "%b %d").replace(year=today.year)
+        # Dates are scanned forward from today; a date that lands >180 days in
+        # the "past" under the current year actually wrapped into next year
+        # (e.g. checking in Nov finds a Jan slot — that Jan is next year, not
+        # 10 months ago). Without this, next-year dates sorted before the
+        # current year's remaining months.
+        if (today - d).days > 180:
+            d = d.replace(year=today.year + 1)
+        return d
     except ValueError:
         return datetime.max
 
