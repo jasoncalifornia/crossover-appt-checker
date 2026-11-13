@@ -324,7 +324,12 @@ async def check_target(ctx, target, weeks_ahead):
             await page.close()
 
         slots = dp["available_days"] if dp else []
-        if not slots and dp and dp["next_available_text"]:
+        providers_filter = target.get("providers")
+        if providers_filter:
+            before = len(slots)
+            slots = [d for d in slots if d.get("provider") in providers_filter]
+            log.info(f"  Filtered to providers {providers_filter}: kept {len(slots)}/{before} day(s)")
+        if not slots and dp and dp["next_available_text"] and not providers_filter:
             slots = [{
                 "label": "Next available",
                 "date": dp["next_available_text"],

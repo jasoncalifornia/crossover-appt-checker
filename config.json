@@ -1,5 +1,5 @@
 {
-  "_comment": "Each target = {service, visit_types[], centers[], check_until?}. weeks_ahead = how many forward-arrow clicks on the date picker. check_until = optional YYYY-MM-DD; target auto-disables after that date. Use the /crossover-config skill to edit.",
+  "_comment": "Each target = {service, visit_types[], centers[], check_until?, providers?}. weeks_ahead = how many forward-arrow clicks on the date picker. check_until = optional YYYY-MM-DD; target auto-disables after that date. providers = optional allowlist; slots from any other provider are dropped before notifying. Use the /crossover-config skill to edit.",
   "weeks_ahead": 16,
   "dedupe_notifications": true,
   "notify": {
@@ -31,7 +31,8 @@
       "service": "Optometry",
       "visit_types": ["Optometry Annual Exam"],
       "centers": ["Sunnyvale", "Mathilda"],
-      "check_until": null
+      "check_until": null,
+      "providers": ["Annie Low, OD"]
     }
   ]
 }
