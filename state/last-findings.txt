@@ -1,1 +1,52 @@
-cleared-1795711192
+Chiropractic|San Tomas/Santa Clara|Dec 10|7|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,3:10 PM,8:30 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Dec 14|8|Daniel Axelrod, DC|10:30 AM,11:10 AM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Dec 16|9|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Dec 17|9|Daniel Axelrod, DC|10:30 AM,11:10 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Dec 2|1|Daniel Axelrod, DC|11:10 AM
+Chiropractic|San Tomas/Santa Clara|Dec 21|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Dec 23|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Dec 28|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Dec 3|3|Daniel Axelrod, DC|8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Dec 30|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Dec 7|8|Daniel Axelrod, DC|10:30 AM,11:10 AM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Dec 9|8|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:50 PM,8:30 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Feb 1|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Feb 10|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Feb 11|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Feb 17|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Feb 18|9|Daniel Axelrod, DC|10:30 AM,11:10 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Feb 22|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Feb 24|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Feb 25|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Feb 3|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Feb 4|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Feb 8|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Jan 11|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Jan 13|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Jan 14|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Jan 20|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Jan 21|9|Daniel Axelrod, DC|10:30 AM,11:10 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Jan 25|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Jan 27|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Jan 28|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Jan 4|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Jan 6|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Chiropractic|San Tomas/Santa Clara|Jan 7|10|Daniel Axelrod, DC|10:30 AM,11:10 AM,11:50 AM,1:50 PM,2:30 PM,3:10 PM,3:50 PM,8:30 AM,9:10 AM,9:50 AM
+Optometry|Sunnyvale/Mathilda|Dec 3|1|Annie Low, OD|9:15 AM
+Optometry|Sunnyvale/Mathilda|Jan 11|5|Annie Low, OD|10:30 AM,2:15 PM,3:00 PM,8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Jan 12|4|Annie Low, OD|1:30 PM,2:15 PM,3:00 PM,3:45 PM
+Optometry|Sunnyvale/Mathilda|Jan 13|6|Annie Low, OD|10:30 AM,11:15 AM,1:30 PM,3:00 PM,8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Jan 14|8|Annie Low, OD|10:30 AM,11:15 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Jan 15|3|Annie Low, OD|10:45 AM,8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Jan 19|7|Annie Low, OD|10:30 AM,11:15 AM,1:30 PM,2:15 PM,3:00 PM,8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Jan 20|7|Annie Low, OD|10:30 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Jan 21|8|Annie Low, OD|10:30 AM,11:15 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Jan 22|4|Annie Low, OD|10:00 AM,10:45 AM,8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Jan 25|8|Annie Low, OD|10:30 AM,11:15 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Jan 26|4|Annie Low, OD|1:30 PM,2:15 PM,3:00 PM,3:45 PM
+Optometry|Sunnyvale/Mathilda|Jan 27|7|Annie Low, OD|10:30 AM,11:15 AM,1:30 PM,2:15 PM,3:00 PM,8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Jan 28|8|Annie Low, OD|10:30 AM,11:15 AM,1:30 PM,2:15 PM,3:00 PM,3:45 PM,8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Jan 29|4|Annie Low, OD|10:00 AM,10:45 AM,8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Jan 5|2|Annie Low, OD|1:30 PM,2:15 PM
+Optometry|Sunnyvale/Mathilda|Jan 7|5|Annie Low, OD|1:30 PM,2:15 PM,3:45 PM,8:30 AM,9:15 AM
+Optometry|Sunnyvale/Mathilda|Jan 8|2|Annie Low, OD|10:00 AM,10:45 AM
